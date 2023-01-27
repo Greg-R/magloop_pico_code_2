@@ -1,6 +1,6 @@
-# C++ Code for the Raspberry Pi Pico Magnetic Loop Antenna Controller
+# C++ Code for the Raspberry Pi Pico Magnetic Loop Antenna Controller Version 2
 
-A "proof of concept" project to replace the STM32F103 "Blue Pill"
+A project to replace the STM32F103 "Blue Pill"
 which is used in the "Controller for Double-Double Mag Loop" described in the book
 "Microcontroller Projects for Amateur Radio by Jack Purdum, W8TEE, and
 Albert Peter, AC8GY".
@@ -15,7 +15,7 @@ The project consists of:
  5.  Detailed documentation covering construction and usage.
 
 The firmware was developed using Visual Studio Code and the Raspberry Pi Pico SDK.
-It is not compatible with the Arduino IDE, although a future fork to Arduino may be possible in the
+It is not compatible with the Arduino IDE, although a fork to Arduino may be possible in the
 future.
 
-Copyright (C) 2022  Gregory Raven
+Copyright (C) 2023  Gregory Raven
