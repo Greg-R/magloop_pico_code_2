@@ -1,6 +1,8 @@
 #include "TmcStepper.h"
 
-TmcStepper::TmcStepper() {}
+TmcStepper::TmcStepper() {
+    tmcConfig = {0, 0, 0, 0, 0, 0, 0, 0};
+}
 
 // Calculate the CRC, which is the last byte in the datagram.  Return the CRC.
 uint8_t TmcStepper::calcCRC(std::array<uint8_t, 8> datagram) // Shouldn't datagramLength be fixed to 8?
@@ -36,9 +38,22 @@ uint8_t TmcStepper::calcCRC(std::array<uint8_t, 8> datagram) // Shouldn't datagr
     return crc;
 }
 
-
-const uint8_t* TmcStepper::getCommand(std::array<uint8_t, 8>& datagram) 
+const uint8_t *TmcStepper::getCommand(std::array<uint8_t, 8> &datagram)
 {
-datagram[7] = calcCRC(datagram);
-return datagram.data();  // Get a C-style pointer to the first element of the std:array.
+    datagram[7] = calcCRC(datagram);
+    return datagram.data(); // Get a C-style pointer to the first element of the std:array (C++ feature).
+}
+
+// A function is needed which turns the driver on/off but does not disturb the step size.
+// The current step size should always be written to tmcConfig.
+// This function will modify the bits of the array for either driver on or driver off.
+
+const uint8_t *TmcStepper::tmcDriverPower(bool driverPower)
+{
+    if (driverPower)
+        tmcConfig[6] = 0b00000010;
+    else
+        tmcConfig[6] = 0b00000000;
+    tmcConfig[7] = calcCRC(tmcConfig);
+    return tmcConfig.data(); // Get a C-style pointer to the first element of the std:array (C++ feature).
 }

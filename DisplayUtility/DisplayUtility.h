@@ -39,17 +39,13 @@
 #include "Data.h"
 #include "Button.h"
 #include "Rotary.h"
+#include "TmcStepper.h"
 #include "FreeSerif9pt7b.h"
 #include "FreeSerif12pt7b.h"
 #include "FreeSerif24pt7b.h"
 #include "FreeMono9pt7b.h"
 #include "FreeMono12pt7b.h"
 #include "FreeMono24pt7b.h"
-
-//extern int menuEncoderMovement;
-//extern int frequencyEncoderMovement;
-//extern int frequencyEncoderMovement2;
-//extern int digitEncoderMovement;
 
 
 class DisplayUtility
@@ -59,14 +55,8 @@ public:
     Adafruit_ILI9341 &tft;
     DDS &dds;
     SWR &swr;
-    //StepperManagement &stepper;
-    //EEPROMClass &eeprom;
     Data &data;
-    //Button &enterbutton;
-    //Button &autotunebutton;
-    //Button &exitbutton;
-    //FrequencyInput &freqInput;
-    //TuneInputs &tuneInputs;
+    TmcStepper tmcstepper;  // This is a stepper configuration object!
     int whichBandOption; // This indicates the current band in use.
     float SWRValue;
     float SWRcurrent;
@@ -82,8 +72,6 @@ public:
     uint32_t SWRMinIndex; // Array index for the SWR minimum.
     volatile int menuEncoderState;
     const std::string menuOptions[3] = {" Freq ", " Presets ", " Calibrate"};
-    //int stepperDirectionOld;
-    //uint32_t stepperDistanceOld;
     int iMax;
     const int arraySize = 500;
     const size_t arg = 500;
@@ -139,14 +127,7 @@ int digitEncoderMovement;
 
     void PowerStepDdsCirRelay(bool stepperPower, uint32_t frequency, bool circuitPower, bool relayPower);
 
-    //  This is the return type for the SWRdataAnalysis function.
-    //std::pair<uint32_t, uint32_t> fpair;
-
-    //void SWRdataAnalysis();
-
-    //void PrintSWRlimits(std::pair<uint32_t, uint32_t> fpair);
-
     void freqEncoderPoll();
 
-      void menuEncoderPoll();
+    void menuEncoderPoll();
 };

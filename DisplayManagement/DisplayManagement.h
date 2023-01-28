@@ -44,6 +44,7 @@
 #include "Data.h"
 #include "Button.h"
 #include "TuneInputs.h"
+//#include "TmcStepper.h"
 #include "FreeSerif9pt7b.h"
 #include "FreeSerif12pt7b.h"
 #include "FreeSerif24pt7b.h"

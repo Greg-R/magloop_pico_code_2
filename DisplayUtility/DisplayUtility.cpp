@@ -36,15 +36,23 @@ DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &
 {
   startUpFlag = false;
   calFlag = false;
-  //menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
-  //frequencyEncoder = Rotary(21, 17);
+  // menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
+  // frequencyEncoder = Rotary(21, 17);
   menuEncoder.begin(true, false);
   frequencyEncoder.begin(true, false);
   menuEncoderMovement = 0;
-frequencyEncoderMovement = 0;
-frequencyEncoderMovement2 = 0;
-digitEncoderMovement = 0;
-
+  frequencyEncoderMovement = 0;
+  frequencyEncoderMovement2 = 0;
+  digitEncoderMovement = 0;
+  // Construct the TmcStepper object.
+  TmcStepper tmcstepper = TmcStepper();
+  // Set main configuration.  Set the TMC driver off.
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
+  // Set the tmcConfig variable to the desired step size.  Driver is off by default.
+  //tmcstepper.tmcConfig = tmcstepper.stepsize128;
+  this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
+  // Set the step size.
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.tmcConfig), 8);
 }
 
 /*****
@@ -362,8 +370,8 @@ int32_t DisplayUtility::UserNumericInput(Button buttonAccept, Button buttonRejec
   // State Machine for frequency input with encoders.
   while (true)
   { // Update number until user pushes button.
-  menuEncoderPoll();
-  freqEncoderPoll();
+    menuEncoderPoll();
+    freqEncoderPoll();
     // Poll accept button.
     buttonAccept.buttonPushed();
     if (buttonAccept.pushed & not lastAcceptButton)
@@ -472,79 +480,95 @@ int32_t DisplayUtility::UserNumericInput(Button buttonAccept, Button buttonRejec
 *****/
 void DisplayUtility::PowerStepDdsCirRelay(bool stepperPower, uint32_t frequency, bool circuitPower, bool relayPower)
 {
-  // Power up versus power down sequency needs to be different so that receiver doesn't emit noise burst.
+  // Power up versus power down sequence needs to be different so that receiver doesn't emit noise burst.
   // Going into AutoTune, turn on the stepper last.
-  if(stepperPower & circuitPower) {
-  gpio_put(data.OPAMPPOWER, circuitPower);
-  gpio_put(data.RFAMPPOWER, circuitPower);
-  gpio_put(data.RFRELAYPOWER, relayPower);
-  //gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+  if (stepperPower & circuitPower)
+  {
+    gpio_put(data.OPAMPPOWER, circuitPower);
+    gpio_put(data.RFAMPPOWER, circuitPower);
+    gpio_put(data.RFRELAYPOWER, relayPower);
+    // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+    if (stepperPower)
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);
+    else
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
   }
   // Coming out of AutoTune, turn off the stepper first.
-  if(!stepperPower & !circuitPower) {
-  //gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
-  gpio_put(data.OPAMPPOWER, circuitPower);
-  gpio_put(data.RFAMPPOWER, circuitPower);
-  gpio_put(data.RFRELAYPOWER, relayPower);
-
+  if (!stepperPower & !circuitPower)
+  {
+    // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+    if (stepperPower)
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);
+    else
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+    gpio_put(data.OPAMPPOWER, circuitPower);
+    gpio_put(data.RFAMPPOWER, circuitPower);
+    gpio_put(data.RFRELAYPOWER, relayPower);
+  }
+  // This case is for zeroing the stepper.
+    if (stepperPower & !circuitPower)
+  {
+    // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+    if (stepperPower)
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);
+    else
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
   }
 
-                                                // Power down the DDS or set frequency.
-                                                // if (dds)
-  dds.SendFrequency(frequency);                 // Redundant?
+  // Power down the DDS or set frequency.
+  // if (dds)
+  dds.SendFrequency(frequency); // Redundant?
   //  Power down RF amplifier and SWR circuits.
-  //gpio_put(data.OPAMPPOWER, circuitPower);
-  //gpio_put(data.RFAMPPOWER, circuitPower);
-  //gpio_put(data.RFRELAYPOWER, relayPower);
+  // gpio_put(data.OPAMPPOWER, circuitPower);
+  // gpio_put(data.RFAMPPOWER, circuitPower);
+  // gpio_put(data.RFRELAYPOWER, relayPower);
   busy_wait_ms(500); //  Wait for relay to switch and DDS to stabilize.
 }
-
 
 void DisplayUtility::menuEncoderPoll()
 {
   uint8_t result;
-  //if ((gpio == 18) || (gpio == 20))
- // {
-    result = menuEncoder.process();
-    if (result != 0)
+  // if ((gpio == 18) || (gpio == 20))
+  // {
+  result = menuEncoder.process();
+  if (result != 0)
+  {
+    switch (result)
     {
-      switch (result)
-      {
-      case DIR_CW:
-        menuEncoderMovement = 1;
-        digitEncoderMovement = 1;
-        break;
-      case DIR_CCW:
-        menuEncoderMovement = -1;
-        digitEncoderMovement = -1;
-        break;
-      }
+    case DIR_CW:
+      menuEncoderMovement = 1;
+      digitEncoderMovement = 1;
+      break;
+    case DIR_CCW:
+      menuEncoderMovement = -1;
+      digitEncoderMovement = -1;
+      break;
     }
   }
- 
+}
 
 void DisplayUtility::freqEncoderPoll()
 {
   uint8_t result;
-  
-    result = frequencyEncoder.process();
-    if (result != 0)
+
+  result = frequencyEncoder.process();
+  if (result != 0)
+  {
+    switch (result)
     {
-      switch (result)
-      {
-      case DIR_CW:
-        frequencyEncoderMovement++;
-        frequencyEncoderMovement2 = 1;
-        break;
-      case DIR_CCW:
-        frequencyEncoderMovement--;
-        frequencyEncoderMovement2 = -1;
-        break;
-      }
+    case DIR_CW:
+      frequencyEncoderMovement++;
+      frequencyEncoderMovement2 = 1;
+      break;
+    case DIR_CCW:
+      frequencyEncoderMovement--;
+      frequencyEncoderMovement2 = -1;
+      break;
     }
-  
- // if (result == DIR_CW)
- //   countEncoder = countEncoder + 1;
- // if (result == DIR_CCW)
- //   countEncoder = countEncoder - 1;
+  }
+
+  // if (result == DIR_CW)
+  //   countEncoder = countEncoder + 1;
+  // if (result == DIR_CCW)
+  //   countEncoder = countEncoder - 1;
 }

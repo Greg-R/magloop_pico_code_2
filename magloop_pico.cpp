@@ -147,11 +147,13 @@ int main()
 
   // Instantiate a TmcStepper object and configure the TMC stepper:
 
-  TmcStepper tmcstepper = TmcStepper();
+  //TmcStepper tmcstepper = TmcStepper();
   // Set main configuration.
-  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
   // Set the step size.
-  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.stepsize064), 8);
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.stepsize064), 8);
+  // Test driver off:
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.driverOff), 8);
   
    //  Instantiate the Stepper Manager:
   StepperManagement stepper = StepperManagement(tft, dds, swr, data, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);

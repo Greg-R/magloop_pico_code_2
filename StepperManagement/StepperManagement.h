@@ -35,6 +35,7 @@
 #include "DisplayUtility.h"
 #include "Button.h"
 #include "Data.h"
+#include "TmcStepper.h"
 
 // This class inherits from AccelStepper, which is an Arduino library.
 class StepperManagement : public AccelStepper, public DisplayUtility
