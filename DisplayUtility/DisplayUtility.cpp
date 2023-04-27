@@ -50,7 +50,11 @@ DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &
   uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
   // Set the tmcConfig variable to the desired step size.  Driver is off by default.
   //tmcstepper.tmcConfig = tmcstepper.stepsize128;
-  this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize128;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize064;
+  this->tmcstepper.tmcConfig = this->tmcstepper.stepsize032;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize008;
   // Set the step size.
   uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.tmcConfig), 8);
 }
@@ -493,8 +497,22 @@ void DisplayUtility::PowerStepDdsCirRelay(bool stepperPower, uint32_t frequency,
     else
       uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
   }
-  // Coming out of AutoTune, turn off the stepper first.
-  if (!stepperPower & !circuitPower)
+  // Coming out of AutoTune, turn off the stepper first.  Circuit power up to measure SWR after stepper is off.
+  if ((not stepperPower) & circuitPower)
+  {
+    // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+    //if (stepperPower)
+    //  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);
+    //else
+    // Turn off stepper driver.
+      uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+    dds.SendFrequency(frequency);
+    gpio_put(data.OPAMPPOWER, circuitPower);
+    gpio_put(data.RFAMPPOWER, circuitPower);
+    gpio_put(data.RFRELAYPOWER, relayPower);
+  }
+    // 
+  if ((not stepperPower) & (not circuitPower))
   {
     // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
     if (stepperPower)
@@ -506,7 +524,7 @@ void DisplayUtility::PowerStepDdsCirRelay(bool stepperPower, uint32_t frequency,
     gpio_put(data.RFRELAYPOWER, relayPower);
   }
   // This case is for zeroing the stepper.
-    if (stepperPower & !circuitPower)
+    if (stepperPower & not circuitPower)
   {
     // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
     if (stepperPower)

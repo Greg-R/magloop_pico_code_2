@@ -113,6 +113,7 @@ void StepperManagement::ResetStepperToZero()
   setMaxSpeed(data.workingData.speed / 2);
   MoveStepperToPosition(-100000);
   setCurrentPosition(0); //  The stepper is now calibrated!  This function sets speed to 0.
+  data.position = 0;
   setSpeed(data.workingData.speed);
   setMaxSpeed(data.workingData.speed); // Put maximum speed back to normal.
 }

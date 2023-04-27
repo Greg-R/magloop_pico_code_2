@@ -142,9 +142,20 @@ int DisplayManagement::manualTune()
 {
   bool lastautotunebutton = true;
   bool lastexitbutton = true;
+  bool lastenterbutton = true;
+  bool relayState = true;  //  This will be toggled by the enter button.
   while (true)
   {
+    menuEncoderPoll();
     exitbutton.buttonPushed(); // Poll exitbutton.
+
+  //   bool lastenterbutton = true;
+  
+  enterbutton.buttonPushed(); // Poll exitbutton.
+  if(enterbutton.pushed == true  and (not lastenterbutton)) {
+    relayState = not relayState;  // Toggle relay state.
+    PowerStepDdsCirRelay(relayState, 0, false, false);
+  }
 
     if (exitbutton.pushed and not lastexitbutton)
     {
@@ -172,6 +183,7 @@ int DisplayManagement::manualTune()
     }
     lastautotunebutton = autotunebutton.pushed;
     lastexitbutton = exitbutton.pushed;
+    lastenterbutton = enterbutton.pushed;
   } // end while
 }
 
@@ -852,10 +864,16 @@ float DisplayManagement::AutoTuneSWR(uint32_t band, uint32_t frequency)
   // Move to optimal position and report results.
   stepper.MoveStepperToPosition(SWRMinPosition - data.workingData.backlash); // Back up position to take out backlash.
   stepper.MoveStepperToPosition(SWRMinPosition);                             // Move to final position in CW direction.
-  minSWR = swr.ReadSWRValue();                                               // Measure VSWR in the final position.
+  
   // Power down all circuits except in calibrate mode.
-  if (calFlag == false)
+  if (calFlag == false) {
+    //  Power down the stepper before measuring VSWR!
+    PowerStepDdsCirRelay(false, frequency, true, true);  // Leave sircuits on to measure SWR.
+    minSWR = swr.ReadSWRValue();                                             // Measure VSWR in the final position.
+  //  Now shut the rest of the circuits down.
     PowerStepDdsCirRelay(false, 0, false, false);
+    }
+  else minSWR = swr.ReadSWRValue(); 
   iMax = i;                                      // Max value in array for plot.
   ShowSubmenuData(minSWR, dds.currentFrequency); // Update SWR value.
   updateMessageTop("               AutoTune Success");

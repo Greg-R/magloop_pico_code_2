@@ -145,6 +145,8 @@ int main()
   // Create a new experimental TuneInputs object.
   TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton);
 
+//  The TmcStepper object is now embedded in DisplayUtility.
+//  Would it be better to explicitly create the TmcStepper object as in this commented code?
   // Instantiate a TmcStepper object and configure the TMC stepper:
 
   //TmcStepper tmcstepper = TmcStepper();
@@ -162,7 +164,12 @@ int main()
   DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs);
 
   // Power on all circuits except stepper and relay.  This is done early to allow circuits to stabilize before calibration.
-  display.PowerStepDdsCirRelay(false, data.workingData.currentFrequency, true, false);
+  //display.PowerStepDdsCirRelay(false, 0, true, false);
+  display.PowerStepDdsCirRelay(false, 0,  true, false);
+ // display.PowerStepDdsCirRelay(false,  0, false, false);  //temp
+ // display.PowerStepDdsCirRelay(true,   0, false, false);  //temp
+  //display.PowerStepDdsCirRelay(false,   0, false, false);  //temp
+ // display.PowerStepDdsCirRelay(false,   0, true, true);  //temp
 
   // Show "Splash" screen for 5 seconds.  This also allows circuits to stabilize.
   display.Splash(data.version, data.releaseDate);
@@ -170,7 +177,8 @@ int main()
   tft.fillScreen(ILI9341_BLACK); // Clear display.
 
   //  Set stepper to zero:
-  display.PowerStepDdsCirRelay(true, data.workingData.currentFrequency, true, false);
+  //display.PowerStepDdsCirRelay(true, data.workingData.currentFrequency, true, false);
+  display.PowerStepDdsCirRelay(true, 0, true, false);
   stepper.ResetStepperToZero();
 
   //  Now measure the ADC (SWR bridge) offsets with the DDS inactive.
@@ -178,6 +186,11 @@ int main()
   display.PowerStepDdsCirRelay(true, 0, true, false);
   swr.ReadADCoffsets();
   display.PowerStepDdsCirRelay(false, 0, false, false); //  Power down all circuits.
+
+  //  Temporary code for examining system.
+  //display.PowerStepDdsCirRelay(true, 0, false, false);
+  //stepper.MoveStepperToPosition(4300);
+  //display.manualTune();
 
   display.menuIndex = display.FREQMENU; // Begin in Frequency menu.
 

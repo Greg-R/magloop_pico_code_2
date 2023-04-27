@@ -87,9 +87,9 @@ const std::string releaseDate = "12-07-22";
     uint32_t calibrated;
   // The following are parameters which must be "tuned" to the particular mechanics in use.
   // Refer to the documentation for setting these values.
-  int zero_offset = 1000; // 600 for full step.  1000 for half-step.  270 for dummy with 1/16 step.
-  int backlash = 70;
-  int coarse_sweep = 20;
+  int zero_offset = 0; // 600 for full step.  1000 for half-step.  270 for dummy with 1/16 step.
+  int backlash = 0;
+  int coarse_sweep = 1;
   int accel = 2000;
   int speed = 500;
   } workingData;
