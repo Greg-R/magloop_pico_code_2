@@ -39,7 +39,7 @@
 #include "Data.h"
 #include "Button.h"
 #include "Rotary.h"
-#include "TmcStepper.h"
+#include "TmcStepper.h"  //  Note that the stepper is configured in this class.
 #include "FreeSerif9pt7b.h"
 #include "FreeSerif12pt7b.h"
 #include "FreeSerif24pt7b.h"
@@ -56,7 +56,7 @@ public:
     DDS &dds;
     SWR &swr;
     Data &data;
-    TmcStepper tmcstepper;  // This is a stepper configuration object!
+    TmcStepper &tmcstepper;  // This is a stepper configuration object!
     int whichBandOption; // This indicates the current band in use.
     float SWRValue;
     float SWRcurrent;
@@ -99,7 +99,7 @@ int frequencyEncoderMovement2;
 int digitEncoderMovement;
 
 
-   DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data);                      
+   DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper);                      
 
     void EraseBelowMenu();
 

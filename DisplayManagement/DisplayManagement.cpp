@@ -31,7 +31,7 @@
 #include "DisplayManagement.h"
 
 DisplayManagement::DisplayManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr,
-                                     StepperManagement &stepper, EEPROMClass &eeprom, Data &data, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs) : GraphPlot(tft, dds, data), DisplayUtility(tft, dds, swr, data), tft(tft), dds(dds), swr(swr),
+                                     StepperManagement &stepper, TmcStepper &tmcstepper, EEPROMClass &eeprom, Data &data, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs) : GraphPlot(tft, dds, data), DisplayUtility(tft, dds, swr, data, tmcstepper), tft(tft), dds(dds), swr(swr),
                                                                                                                                                                                                                         stepper(stepper), eeprom(eeprom), data(data), enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton), tuneInputs(tuneInputs)
 {
   startUpFlag = false;
@@ -560,7 +560,7 @@ void DisplayManagement::DoFirstCalibrate()
   // Slopes can't be computed until the actual values are loaded from flash:
   data.computeSlopes();
   calFlag = false;
-  PowerStepDdsCirRelay(false, 0, false, false);
+  //PowerStepDdsCirRelay(false, 0, false, false);  // !!!
   updateMessageBottom("        Initial Calibration Complete");
   updateMessageTop("                    Press Exit");
   while (true)
@@ -639,7 +639,7 @@ void DisplayManagement::DoSingleBandCalibrate(int whichBandOption)
   eeprom.commit(); // Write values to EEPROM
   updateMessageTop("                     Press Exit");
   updateMessageBottom("     Single Band Calibrate Complete");
-  PowerStepDdsCirRelay(false, 0, false, false);
+  //PowerStepDdsCirRelay(false, 0, false, false); // !!!
   calFlag = false;
   while (exitbutton.pushed == false)
   {
@@ -867,9 +867,10 @@ float DisplayManagement::AutoTuneSWR(uint32_t band, uint32_t frequency)
   
   // Power down all circuits except in calibrate mode.
   if (calFlag == false) {
-    //  Power down the stepper before measuring VSWR!
-    PowerStepDdsCirRelay(false, frequency, true, true);  // Leave sircuits on to measure SWR.
-    minSWR = swr.ReadSWRValue();                                             // Measure VSWR in the final position.
+    //  Power down the stepper before measuring VSWR!  Delay to allow TMC to slowly decrease motor hold current.
+    busy_wait_ms(5000);
+    PowerStepDdsCirRelay(false, frequency, true, true);  // Disengage stepper driver.  Leave circuits on to measure SWR.
+    minSWR = swr.ReadSWRValue();                         // Measure VSWR in the final position.
   //  Now shut the rest of the circuits down.
     PowerStepDdsCirRelay(false, 0, false, false);
     }
@@ -995,7 +996,7 @@ void DisplayManagement::CalibrationMachine()
     case State::state2: // Zero Stepper
       PowerStepDdsCirRelay(true, 0, false, false);
       stepper.ResetStepperToZero();
-      PowerStepDdsCirRelay(false, 0, false, false);
+      //PowerStepDdsCirRelay(false, 0, false, false); // !!!
       state = State::state0; // Return to Calibration select after exiting state2.
       lastexitbutton = true; // Must set true here, or will jump to top level.
       break;

@@ -1,7 +1,22 @@
 #include "TmcStepper.h"
 
+//  A configuration Class for the TMC stepper driver.
 TmcStepper::TmcStepper() {
     tmcConfig = {0, 0, 0, 0, 0, 0, 0, 0};
+      // Set main configuration.  Set the TMC driver off.
+  uart_write_blocking(uart1, getCommand(forward), 8);
+  // Set the tmcConfig variable to the desired step size.  Driver is off by default.
+  //tmcstepper.tmcConfig = tmcstepper.stepsize128;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize128;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize064;
+  tmcConfig = stepsize016;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize008;
+  // Set the step size and turn the driver off.
+  uart_write_blocking(uart1, tmcDriverPower(false), 8);
+  // Set the power off behavior and braking.
+  uart_write_blocking(uart1, getCommand(powerBrakingConfig), 8);
+  uart_write_blocking(uart1, getCommand(iHoldiRun), 8);
 }
 
 // Calculate the CRC, which is the last byte in the datagram.  Return the CRC.
@@ -38,6 +53,7 @@ uint8_t TmcStepper::calcCRC(std::array<uint8_t, 8> datagram) // Shouldn't datagr
     return crc;
 }
 
+// This is required due to the way the driver uses a CRC datagram for error correction.
 const uint8_t *TmcStepper::getCommand(std::array<uint8_t, 8> &datagram)
 {
     datagram[7] = calcCRC(datagram);

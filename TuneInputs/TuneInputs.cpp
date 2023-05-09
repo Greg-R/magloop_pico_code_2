@@ -31,9 +31,9 @@
 #include "TuneInputs.h"
 
 TuneInputs::TuneInputs(Adafruit_ILI9341 &tft,
-                               EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, Button &autotunebutton, Button &exitbutton)
-                                : DisplayUtility(tft, dds, swr, data),
-                                  tft(tft), eeprom(eeprom), data(data), enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton)
+                               EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TmcStepper &tmcstepper)
+                                : DisplayUtility(tft, dds, swr, data, tmcstepper),
+                                  tft(tft), eeprom(eeprom), data(data), enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton), tmcstepper(tmcstepper)
 {
   parameters[0] = data.workingData.zero_offset;
   parameters[1] = data.workingData.backlash;

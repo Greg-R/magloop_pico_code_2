@@ -30,8 +30,8 @@
 
 #include "StepperManagement.h"
 
-StepperManagement::StepperManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, AccelStepper::MotorInterfaceType interface, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable) :AccelStepper(interface, pin1, pin2),
-                                     DisplayUtility(tft, dds, swr, data), data(data)
+StepperManagement::StepperManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper, AccelStepper::MotorInterfaceType interface, uint8_t pin1, uint8_t pin2, uint8_t pin3, uint8_t pin4, bool enable) :AccelStepper(interface, pin1, pin2),
+                                     DisplayUtility(tft, dds, swr, data, tmcstepper), data(data), tmcstepper(tmcstepper)
 {
   // position = 2500;          // Default to approximately midrange.
   rotation = -1;
@@ -86,7 +86,7 @@ void StepperManagement::MoveStepperToPosition(int32_t position)
      EraseBelowMenu();
      updateMessageMiddle("   Maximum switch was closed, correct      problem!!!");
      // Cut power to halt controller.
-     PowerStepDdsCirRelay(false, 0, false, false);
+     //PowerStepDdsCirRelay(false, 0, false, false);  // !!!
      return;
      //busy_wait_ms(3000);
      //EraseBelowMenu();

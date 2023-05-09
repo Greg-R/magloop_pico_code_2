@@ -61,6 +61,7 @@ public:
     Button &enterbutton;
     Button &autotunebutton;
     Button &exitbutton;
+    TmcStepper &tmcstepper;
     int whichBandOption;  // This indicates the current band in use.
     float SWRValue;
     float SWRcurrent;
@@ -81,7 +82,7 @@ public:
     }; // Used to move between states in state machines.
     State state;
 
-    TuneInputs(Adafruit_ILI9341 &tft, EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, Button &autotunebutton, Button &exitbutton);
+    TuneInputs(Adafruit_ILI9341 &tft, EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TmcStepper &tmcstepper);
 
     void SelectParameter();
 

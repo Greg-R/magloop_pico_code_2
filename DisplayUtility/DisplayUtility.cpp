@@ -32,7 +32,7 @@
 
 #include "DisplayUtility.h"
 
-DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data) : tft(tft), dds(dds), swr(swr), data(data)
+DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper) : tft(tft), dds(dds), swr(swr), data(data), tmcstepper(tmcstepper)
 {
   startUpFlag = false;
   calFlag = false;
@@ -44,19 +44,6 @@ DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &
   frequencyEncoderMovement = 0;
   frequencyEncoderMovement2 = 0;
   digitEncoderMovement = 0;
-  // Construct the TmcStepper object.
-  TmcStepper tmcstepper = TmcStepper();
-  // Set main configuration.  Set the TMC driver off.
-  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
-  // Set the tmcConfig variable to the desired step size.  Driver is off by default.
-  //tmcstepper.tmcConfig = tmcstepper.stepsize128;
-  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
-  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize128;
-  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize064;
-  this->tmcstepper.tmcConfig = this->tmcstepper.stepsize032;
-  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize008;
-  // Set the step size.
-  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.tmcConfig), 8);
 }
 
 /*****
@@ -527,6 +514,9 @@ void DisplayUtility::PowerStepDdsCirRelay(bool stepperPower, uint32_t frequency,
     if (stepperPower & not circuitPower)
   {
     // gpio_put(data.STEPPERSLEEPNOT, stepperPower); //  Deactivating the stepper driver is important to reduce RFI.
+    gpio_put(data.OPAMPPOWER, circuitPower);
+    gpio_put(data.RFAMPPOWER, circuitPower);
+    gpio_put(data.RFRELAYPOWER, relayPower);
     if (stepperPower)
       uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);
     else

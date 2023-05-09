@@ -86,7 +86,7 @@ int main()
   uart_set_hw_flow(uart1, false, false);
   // Set our data format
   uart_set_format(uart1, 8, 1, UART_PARITY_NONE);
-  uart_set_fifo_enabled(uart1, true);
+  //uart_set_fifo_enabled(uart1, true);
 
   int currentFrequency;
 
@@ -142,30 +142,79 @@ int main()
   // Instantiate SWR object.  Read bridge offsets later when other circuits are active.
   SWR swr = SWR();
 
-  // Create a new experimental TuneInputs object.
-  TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton);
+    //  Instantiate the TMC stepper:
+  TmcStepper tmcstepper = TmcStepper();
 
+  // Create a new experimental TuneInputs object.
+  TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
+
+
+
+   //  Instantiate the Stepper Manager:
+  StepperManagement stepper = StepperManagement(tft, dds, swr, data, tmcstepper, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);
+
+
+
+/*
 //  The TmcStepper object is now embedded in DisplayUtility.
 //  Would it be better to explicitly create the TmcStepper object as in this commented code?
   // Instantiate a TmcStepper object and configure the TMC stepper:
-
-  //TmcStepper tmcstepper = TmcStepper();
-  // Set main configuration.
-  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
-  // Set the step size.
-  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.stepsize064), 8);
-  // Test driver off:
+  //display.PowerStepDdsCirRelay(true, 0, false, false);
+  stepper.setCurrentPosition(0);
+  TmcStepper tmcstepper = TmcStepper();
+  //busy_wait_ms(300000);
+  // Set main configuration.  This is set once.
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
   //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.driverOff), 8);
-  
-   //  Instantiate the Stepper Manager:
-  StepperManagement stepper = StepperManagement(tft, dds, swr, data, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);
+  // Set the step size.
+  tmcstepper.tmcConfig = tmcstepper.stepsize008;
+  std::array<uint8_t, 8> tmcTest;
+  //tmcstepper.tmcDriverPower(false);
+  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+//  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.stepsize064), 8);
+  // Test driver off:
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.tmcConfig), 8);
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.powerBrakingConfig), 8);
+  //uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.iHoldiRun), 8);
+  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(true), 8);  // This turns on the driver via the tmcConfig array.
+  stepper.MoveStepperToPosition(4000);
+  //uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+  stepper.MoveStepperToPosition(1);
+  stepper.MoveStepperToPosition(4000);
+  stepper.MoveStepperToPosition(0);
+  busy_wait_ms(300000);
+  */
+ /*
+   TmcStepper tmcstepper = TmcStepper();
+  // Set main configuration.  Set the TMC driver off.
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.forward), 8);
+  // Set the tmcConfig variable to the desired step size.  Driver is off by default.
+  //tmcstepper.tmcConfig = tmcstepper.stepsize128;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize256;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize128;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize064;
+  tmcstepper.tmcConfig = tmcstepper.stepsize016;
+  //this->tmcstepper.tmcConfig = this->tmcstepper.stepsize008;
+  // Set the step size and turn the driver off.
+  uart_write_blocking(uart1, tmcstepper.tmcDriverPower(false), 8);
+  // Set the power off behavior and braking.
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.powerBrakingConfig), 8);
+  uart_write_blocking(uart1, tmcstepper.getCommand(tmcstepper.iHoldiRun), 8);
+  */
 
-  // Instantiate the DisplayManagement object.  This object has many important methods.
-  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs);
+   // Instantiate the DisplayManagement object.  This object has many important methods.
+  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs);
 
   // Power on all circuits except stepper and relay.  This is done early to allow circuits to stabilize before calibration.
-  //display.PowerStepDdsCirRelay(false, 0, true, false);
-  display.PowerStepDdsCirRelay(false, 0,  true, false);
+  display.PowerStepDdsCirRelay(true,  7000000, true, false);
+  //stepper.MoveStepperToPosition(4000);
+  //busy_wait_ms(300000);
+  //display.PowerStepDdsCirRelay(false, 0, false, false);
+  //display.PowerStepDdsCirRelay(true,  0, false, false);
+  //display.PowerStepDdsCirRelay(false, 0, false, false);
+  //display.PowerStepDdsCirRelay(true,  0, false, false);
  // display.PowerStepDdsCirRelay(false,  0, false, false);  //temp
  // display.PowerStepDdsCirRelay(true,   0, false, false);  //temp
   //display.PowerStepDdsCirRelay(false,   0, false, false);  //temp
@@ -185,12 +234,15 @@ int main()
   //  Note that this should be done as late as possible for circuits to stabilize.
   display.PowerStepDdsCirRelay(true, 0, true, false);
   swr.ReadADCoffsets();
-  display.PowerStepDdsCirRelay(false, 0, false, false); //  Power down all circuits.
+  display.PowerStepDdsCirRelay(true, 0, false, false); //  Power down all circuits.
 
   //  Temporary code for examining system.
-  //display.PowerStepDdsCirRelay(true, 0, false, false);
-  //stepper.MoveStepperToPosition(4300);
-  //display.manualTune();
+  //display.PowerStepDdsCirRelay(true, 0, false, false);  //  Stepper on only.
+  //uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.powerBrakingConfig), 8);
+  //uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.iHoldiRun), 8);
+  //stepper.MoveStepperToPosition(4000);  // Preset stepper to some desired frequency.
+  //display.manualTune();  //  Manual steps using encoder.
+  //display.PowerStepDdsCirRelay(false, 7000000, true, false);
 
   display.menuIndex = display.FREQMENU; // Begin in Frequency menu.
 

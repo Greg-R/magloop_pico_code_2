@@ -102,7 +102,7 @@ public:
     bool startUpFlag;
     bool calFlag;
 
-    DisplayManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, StepperManagement &stepper, EEPROMClass &eeprom, Data &data,
+    DisplayManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, StepperManagement &stepper, TmcStepper &tmcstepper, EEPROMClass &eeprom, Data &data,
                       Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs);
 
     void Splash(std::string version, std::string releaseDate);

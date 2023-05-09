@@ -47,11 +47,12 @@ public:
    float hertzPerStepperUnitAir[3];
    //Button& exitbutton;
    Data &data;
+   TmcStepper &tmcstepper;
 
    //  This constructor duplicates the parameters of the AccelStepper constructor.
    //  The actual parameters when instantiating:  DRIVER, STEPPERPUL, STEPPERDIR
 
-   StepperManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, AccelStepper::MotorInterfaceType interface, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
+   StepperManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper, AccelStepper::MotorInterfaceType interface, uint8_t pin1 = 2, uint8_t pin2 = 3, uint8_t pin3 = 4, uint8_t pin4 = 5, bool enable = true);
 
    void MoveStepperToPosition(int32_t position);
 
