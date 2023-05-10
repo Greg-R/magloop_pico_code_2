@@ -32,7 +32,7 @@ public:
   std::array<uint8_t, 8> tmcConfig;  // This is used to update the TMC driver configuration, especially to turn the driver on and off.
 
   // Velocity Dependent Control  0x10                                              32 bits data                                    CRC
-  std::array<uint8_t, 8> iHoldiRun =          {0b00000101, 0b00000000, 0b10010000, 0b00000000, 0b00000100, 0b00011111, 0b00000000, 0b00000000};
+  std::array<uint8_t, 8> iHoldiRun =          {0b00000101, 0b00000000, 0b10010000, 0b00000000, 0b00000001, 0b00011111, 0b00000000, 0b00000000};
   //                                                                                       IHOLDDELAY^^^^       ^^^^^IRUN   ^^^^^IHOLD_IRUN 
   //  Configuration of the power off behavior and braking.  PWMCONF Register 0x70.  Default is 0xC10D0024
   //                                               Sync        Slave addr  RW+Reg Addr 32 bits Data                                    CRC

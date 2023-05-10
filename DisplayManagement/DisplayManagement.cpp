@@ -552,6 +552,7 @@ void DisplayManagement::DoFirstCalibrate()
       //  position = stepper.currentPosition() - 50;
     } // end for (j
   } // end for (i
+  PowerStepDdsCirRelay(false, 0, false, false);  // Power down, calibration is complete.
   //  Set the calibrated flag in workingData.
   data.workingData.calibrated = 1;
   eeprom.put(0, data.workingData);
@@ -868,7 +869,7 @@ float DisplayManagement::AutoTuneSWR(uint32_t band, uint32_t frequency)
   // Power down all circuits except in calibrate mode.
   if (calFlag == false) {
     //  Power down the stepper before measuring VSWR!  Delay to allow TMC to slowly decrease motor hold current.
-    busy_wait_ms(5000);
+    busy_wait_ms(1000);
     PowerStepDdsCirRelay(false, frequency, true, true);  // Disengage stepper driver.  Leave circuits on to measure SWR.
     minSWR = swr.ReadSWRValue();                         // Measure VSWR in the final position.
   //  Now shut the rest of the circuits down.
