@@ -83,6 +83,10 @@ void Data::writeDefaultValues()
    workingData.bandEdges[2][0] = LOWEND20M;
    workingData.bandEdges[2][1] = HIGHEND20M;
 
+   workingData.lastFreq[0] =  7150000;
+   workingData.lastFreq[1] = 10130000;
+   workingData.lastFreq[2] = 14200000;
+
    workingData.currentBand = 0;
    workingData.currentFrequency = 7150000;
    workingData.initialized = 0x55555555;

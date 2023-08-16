@@ -87,6 +87,12 @@ public:
         state2,
         state3
     }; // Used to move between states in state machines.
+        enum class TopMenuState
+    {
+FREQMENU,
+PRESETMENU,
+CALIBRATEMENU
+    };
     State state;
     bool startUpFlag;
     bool calFlag;
@@ -105,7 +111,7 @@ int digitEncoderMovement;
 
     void ErasePage();
 
-    void ShowMainDisplay(int whichMenuPage);
+    void ShowMainDisplay(TopMenuState whichMenuPage);
 
     void ShowSubmenuData(float SWR, int currentFrequency);
 

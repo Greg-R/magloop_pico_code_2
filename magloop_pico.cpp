@@ -174,7 +174,7 @@ int main()
   //display.manualTune();  //  Manual steps using encoder.
   //display.PowerStepDdsCirRelay(false, 7000000, true, false);
 
-  display.menuIndex = display.FREQMENU; // Begin in Frequency menu.
+  display.menuIndex = display.TopMenuState::FREQMENU; // Begin in Frequency menu.
 
   // Main loop state machine:
   while (true)
@@ -188,20 +188,20 @@ int main()
 
     switch (display.menuIndex)
     {
-    case display.FREQMENU: // Manual frequency selection selection and AutoTune.
+    case display.TopMenuState::FREQMENU: // Manual frequency selection selection and AutoTune.
       display.frequencyMenuOption();
       break;
 
-    case display.PRESETMENU:    // Preset frequencies by band - set in .ino file, variable: presetFrequencies[0][2];
+    case display.TopMenuState::PRESETMENU:    // Preset frequencies by band - set in .ino file, variable: presetFrequencies[0][2];
       display.ProcessPresets(); // Select a preselected frequency.  This should return a frequency???
       break;
 
-    case display.CALIBRATEMENU: // Run calibration routines.
+    case display.TopMenuState::CALIBRATEMENU: // Run calibration routines.
       display.CalibrationMachine();
       break;
 
     default:
-      display.menuIndex = 0;
+      display.menuIndex = display.TopMenuState::FREQMENU;
       break;
     } // switch (menuIndex)
   }   // while(1)  (end of main loop)

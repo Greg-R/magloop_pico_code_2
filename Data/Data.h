@@ -83,6 +83,7 @@ const std::string releaseDate = "5-07-23";
                               //   {LOWEND20M, HIGHEND20M}};
     uint32_t currentBand = 0;
     uint32_t currentFrequency = 7150000;
+    uint32_t lastFreq[3];  // Used to remember the last autotune frequency.
     uint32_t initialized = 0x55555555;
     uint32_t calibrated;
   // The following are parameters which must be "tuned" to the particular mechanics in use.

@@ -70,11 +70,11 @@ public:
     float SWRcurrent;
     float readSWRValue;
     int position;
-    int positionTemp;
-    int menuIndex;
+    int positionTemp; 
     static constexpr int FREQMENU = 0;
     static constexpr int PRESETMENU = 1;
     static constexpr int CALIBRATEMENU = 2;
+    TopMenuState menuIndex;
     int submenuIndex; // Does this really need to be a member?
     int SWRFinalPosition;
     uint32_t SWRMinIndex; // Array index for the SWR minimum.
@@ -113,7 +113,7 @@ public:
 
     int32_t ChangeFrequency(int bandIndex, int32_t frequency);
 
-    int MakeMenuSelection(int index);
+    TopMenuState MakeMenuSelection(TopMenuState index);
 
     int SelectBand(const std::string bands[3]);
 

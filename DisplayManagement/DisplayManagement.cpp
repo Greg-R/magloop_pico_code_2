@@ -100,10 +100,10 @@ void DisplayManagement::frequencyMenuOption()
         state = State::state0;
         break;
       }
-      if (whichBandOption == this->data.workingData.currentBand)
-        frequency = data.workingData.currentFrequency;
-      else
-        frequency = data.workingData.presetFrequencies[whichBandOption][3]; // Set initial frequency for each band from Preset list
+//      if (whichBandOption == this->data.workingData.currentBand)
+//        frequency = data.workingData.currentFrequency;
+//      else
+        frequency = data.workingData.lastFreq[whichBandOption]; // Set initial frequency for each band from Preset list
       this->data.workingData.currentBand = whichBandOption;                 //  Update the current band.
       state = State::state2;                                                // Proceed to manual frequency adjustment state.
       break;
@@ -116,6 +116,7 @@ void DisplayManagement::frequencyMenuOption()
         break;
       }
       data.workingData.currentFrequency = frequency;
+      data.workingData.lastFreq[whichBandOption] = frequency;
       eeprom.put(0, data.workingData);
       eeprom.commit(); // Write to EEPROM.
       tft.fillRect(0, 100, 311, 150, ILI9341_BLACK); // ???
@@ -245,7 +246,8 @@ int32_t DisplayManagement::ChangeFrequency(int bandIndex, int32_t frequency)
 
 /*****
   Purpose: To get a main menu choice:  Freq, Presets, or 1st Cal.
-
+           The method is at the top of the loop function.
+           It is at the very top of the user interface.
   Argument list:
 
   Return value:
@@ -253,15 +255,16 @@ int32_t DisplayManagement::ChangeFrequency(int bandIndex, int32_t frequency)
 
   Dependencies:  Adafruit_ILI9341
 *****/
-int DisplayManagement::MakeMenuSelection(int index) // Al Mod 9-8-19
+DisplayUtility::TopMenuState DisplayManagement::MakeMenuSelection(TopMenuState index) // Al Mod 9-8-19
 {
   int currentFrequency;
   tft.setFont();
   tft.setTextSize(2);
-  int i;
+  int i, index_int;
   bool lastPushed;
   bool autotuneLastPushed = true;
-
+  // Cast index to integer so it can be easily manipulated.
+  index_int = static_cast<int>(index);
   // Check if initial calibration has been run.  Inform user if not.
   if (data.workingData.calibrated == 0)
   {
@@ -315,7 +318,7 @@ int DisplayManagement::MakeMenuSelection(int index) // Al Mod 9-8-19
         AutoTuneSWR(data.workingData.currentBand, dds.currentFrequency);
         // Set startUpFlag to true.  This is used to skip this process after one-time use.
         startUpFlag = true;
-        return 3; // This will go to default in the state machine, causing a refresh of the main display.
+        return TopMenuState::CALIBRATEMENU; // This will go to default in the state machine, causing a refresh of the main display.
       }
     }
     autotuneLastPushed = autotunebutton.pushed;
@@ -323,23 +326,23 @@ int DisplayManagement::MakeMenuSelection(int index) // Al Mod 9-8-19
     if (enterbutton.pushed)
       break; // Looking for a low to high transition here!
              //   lastPushed = enterbutton.pushed;
-    menuEncoderPoll();
+    menuEncoderPoll();  // Polling across the top menu selections of Freq, Presets, and Calibrate.
     if (menuEncoderMovement)
     { // Must be i (CW) or -1 (CCW)
       if (menuEncoderMovement == 1)
       {
-        index++;
-        if (index == data.MAXMENUES)
+        index_int++;
+        if (index_int == data.MAXMENUES)
         { // wrap to first index
-          index = 0;
+          index_int = 0;
         }
       }
       if (menuEncoderMovement == -1)
       {
-        index--;
-        if (index < 0)
+        index_int--;
+        if (index_int < 0)
         { // wrap to first index
-          index = data.MAXMENUES - 1;
+          index_int = data.MAXMENUES - 1;
         }
       }
       menuEncoderMovement = 0;
@@ -350,17 +353,17 @@ int DisplayManagement::MakeMenuSelection(int index) // Al Mod 9-8-19
         tft.print(menuOptions[i].c_str());
       }
       tft.setTextColor(ILI9341_BLUE, ILI9341_WHITE);
-      tft.setCursor(index * 100, 0);
-      tft.print(menuOptions[index].c_str());
+      tft.setCursor(index_int * 100, 0);
+      tft.print(menuOptions[index_int].c_str());
     }
   } // end State Machine
 
   tft.setTextColor(ILI9341_BLUE, ILI9341_WHITE);
-  tft.setCursor(index * 100, 0);
-  tft.print(menuOptions[index].c_str());
+  tft.setCursor(index_int * 100, 0);
+  tft.print(menuOptions[index_int].c_str());
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
   startUpFlag = true; // Set this flag on first time use and exit from this function.
-  return index;
+  return static_cast<TopMenuState>(index_int);  // Cast back to the state enum.
 }
 
 /*****

@@ -80,16 +80,16 @@ void DisplayUtility::ErasePage()
   Return value:
     void
 *****/
-void DisplayUtility::ShowMainDisplay(int whichMenuPage)
+void DisplayUtility::ShowMainDisplay(TopMenuState whichMenuPage)
 {
-  int lastMenuPage = 0;
+  //int lastMenuPage = 0;
   int i;
   tft.setFont();
   tft.setTextSize(2);
   tft.fillScreen(ILI9341_BLACK);
   for (i = 0; i < 3; i++)
   {
-    if (i == whichMenuPage)
+    if (i == static_cast<int>(whichMenuPage))
     {
       tft.setTextColor(ILI9341_BLUE, ILI9341_WHITE);
     }
