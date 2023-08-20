@@ -32,12 +32,14 @@
 
 #include "DisplayUtility.h"
 
-DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper) : tft(tft), dds(dds), swr(swr), data(data), tmcstepper(tmcstepper)
+DisplayUtility::DisplayUtility(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Data &data, TmcStepper &tmcstepper) : tft(tft), dds(dds), swr(swr),
+                               data(data), tmcstepper(tmcstepper), menuEncoder(20, 18), frequencyEncoder(21, 17)
 {
   startUpFlag = false;
   calFlag = false;
-  // menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
-  // frequencyEncoder = Rotary(21, 17);
+  menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
+  frequencyEncoder = Rotary(21, 17); // Swap if encoder works in wrong direction.
+ // horseshitEncoder(21, 17);
   menuEncoder.begin(true, false);
   frequencyEncoder.begin(true, false);
   menuEncoderMovement = 0;
@@ -574,7 +576,6 @@ void DisplayUtility::freqEncoderPoll()
       break;
     }
   }
-
   // if (result == DIR_CW)
   //   countEncoder = countEncoder + 1;
   // if (result == DIR_CCW)

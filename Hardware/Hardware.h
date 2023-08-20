@@ -30,18 +30,25 @@
 
 #pragma once
 #include <stdint.h>
-#include <string>
-#include <utility>
-#include <array>
 #include "pico/stdlib.h"
+#include <string>
+#include <vector>
+#include <utility>
+#include "hardware/spi.h"
+#include "hardware/timer.h"
+#include "hardware/clocks.h"
+#include "hardware/uart.h"
 #include "Adafruit_ILI9341.h"
-#include "Arduino.h"
+//#include "DisplayManagement.h"
+#include "AccelStepper.h"
+#include "StepperManagement.h"
 #include "DDS.h"
 #include "SWR.h"
-#include "StepperManagement.h"
 #include "EEPROM.h"
 #include "Data.h"
 #include "Button.h"
+//#include "TuneInputs.h"
+#include "TmcStepper.h"
 #include "DisplayUtility.h"
 #include "FreeSerif9pt7b.h"
 #include "FreeSerif12pt7b.h"
@@ -50,29 +57,53 @@
 #include "FreeMono12pt7b.h"
 #include "FreeMono24pt7b.h"
 
+//int menuEncoderMovement;
+//int frequencyEncoderMovement;
+//int frequencyEncoderMovement2;
+//int digitEncoderMovement;
 
-//  TuneInputs inherits from class DisplayUtility.
-class TuneInputs : public DisplayUtility {
+//  This class is intended to manage various frequency and position related constants and variables.
+//  The single object will be referenced by most or maybe all of the other class objects.
+
+class Hardware  : public DisplayUtility
+{
 
 public:
-    Adafruit_ILI9341 &tft;
-    EEPROMClass &eeprom;
-    Data &data;
-    Button &enterbutton;
-    Button &autotunebutton;
-    Button &exitbutton;
-    TmcStepper &tmcstepper;
-    int whichBandOption;  // This indicates the current band in use.
-    float SWRValue;
-    float SWRcurrent;
-    float readSWRValue;
-    int position;
-    int menuIndex;
-    int submenuIndex;
-    volatile int menuEncoderState;
-    std::array<std::string, 5> parameterNames;
-    std::array<int32_t, 5> parameters; //={data.workingData.zero_offset, data.workingData.backlash, data.workingData.coarse_sweep, data.workingData.accel, data.workingData.speed};
-    std::array<int32_t, 5> hardware;
+
+Adafruit_ILI9341 &tft;
+DDS &dds;
+SWR &swr;
+Button &enterbutton;
+Button &autotunebutton;
+Button &exitbutton;
+Data &data;
+TmcStepper &tmcstepper;
+StepperManagement &stepper;
+//const std::string version = "main";
+//const std::string releaseDate = "5-07-23";
+
+  // Flags used to indicate switch closures.
+  bool maxclose;
+  bool zeroclose;
+
+  // Bands used:
+
+  std::vector<std::string> tests = {"Button Test", "Encoder Test", "SWR Test", "Motor Test"};
+
+  //  This should be made variable length arrays.
+  //float countPerHertz[3];
+  //float hertzPerStepperUnitVVC[3]; // Voltage Variable Cap
+
+  // GPIO assignments.
+  //  Buttons
+  //uint enterButton = 6;
+  //uint autotuneButton = 7;
+  //uint exitButton = 9;
+  // Zero and Maximum switches.
+  //uint zeroswitch = 10;
+  //uint maxswitch = 11;
+  // Stepper position.  This is here because it is not always convenient to interogate the stepper object.
+  int32_t position;
     enum class State
     {
         state0,
@@ -81,18 +112,26 @@ public:
         state3
     }; // Used to move between states in state machines.
     State state;
+    volatile int menuEncoderState;
+    int submenuIndex, pauseTime;
+    //std::array<std::string, 5> parameterNames;
 
-    TuneInputs(Adafruit_ILI9341 &tft, EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton,
-               Button &autotunebutton, Button &exitbutton, TmcStepper &tmcstepper);
+  Hardware(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Button &enterbutton, Button &autotunebutton, Button &exitbutton, Data &data, StepperManagement &stepper, TmcStepper &tmcstepper);
 
-    void SelectParameter();
+  int32_t UserNumericInput2(Button buttonAccept, Button buttonReject, int32_t number);
+  
+  void SWR_Test();
 
-    int32_t ChangeParameter(int32_t frequency);
+  void ButtonTest();
 
-    void RestorePreviousChoice(int submenuIndex);
+  void EncoderTest();
 
-    void HighlightNextChoice(int submenuIndex);
+  void MotorTest();
 
-    void EncoderTest();
+  void SelectTest();
+
+  void RestorePreviousChoice(int submenuIndex);
+
+  void HighlightNextChoice(int submenuIndex);
 
 };

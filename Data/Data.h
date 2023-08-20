@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include "pico/stdlib.h"
 #include <string>
+#include <vector>
 
 //  This class is intended to manage various frequency and position related constants and variables.
 //  The single object will be referenced by most or maybe all of the other class objects.
@@ -57,7 +58,7 @@ const std::string releaseDate = "5-07-23";
 
   // Bands used:
 
-  std::string bands[3] = {"40M", "30M", "20M"};
+  std::vector<std::string> bands = {"40M", "30M", "20M"};
   static const uint32_t LOWEND40M = 7000000;
   static const uint32_t HIGHEND40M = 7300000;
   static const uint32_t LOWEND30M = 10100000;

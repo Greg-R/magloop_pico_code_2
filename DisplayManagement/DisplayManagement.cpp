@@ -31,8 +31,14 @@
 #include "DisplayManagement.h"
 
 DisplayManagement::DisplayManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr,
-                                     StepperManagement &stepper, TmcStepper &tmcstepper, EEPROMClass &eeprom, Data &data, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs) : GraphPlot(tft, dds, data), DisplayUtility(tft, dds, swr, data, tmcstepper), tft(tft), dds(dds), swr(swr),
-                                                                                                                                                                                                                        stepper(stepper), eeprom(eeprom), data(data), enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton), tuneInputs(tuneInputs)
+                                     StepperManagement &stepper, TmcStepper &tmcstepper,
+                                     EEPROMClass &eeprom, Data &data, Button &enterbutton, 
+                                     Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs, 
+                                     Hardware &testArray) : GraphPlot(tft, dds, data), 
+                                     DisplayUtility(tft, dds, swr, data, tmcstepper), tft(tft), dds(dds), swr(swr),
+                                     stepper(stepper), eeprom(eeprom), data(data), enterbutton(enterbutton), 
+                                     autotunebutton(autotunebutton), exitbutton(exitbutton), 
+                                     tuneInputs(tuneInputs), testArray(testArray)
 {
   startUpFlag = false;
   calFlag = false;
@@ -375,7 +381,7 @@ DisplayUtility::TopMenuState DisplayManagement::MakeMenuSelection(TopMenuState i
 
   Dependencies:  Adafruit_ILI9341 tft
 *****/
-int DisplayManagement::SelectBand(const std::string bands[3])
+int DisplayManagement::SelectBand(std::vector<std::string> bands)
 {
   updateMessageTop("       Choose using Menu Encoder");
   EraseBelowMenu(); // Redundant???
@@ -387,7 +393,7 @@ int DisplayManagement::SelectBand(const std::string bands[3])
   tft.setTextSize(1);
   tft.setFont(&FreeSerif12pt7b);
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < bands.size(); i++)
   {
     tft.setCursor(110, 110 + i * 30);
     tft.print(bands[i].c_str());
@@ -406,7 +412,7 @@ int DisplayManagement::SelectBand(const std::string bands[3])
       if (menuEncoderMovement == 1)
       {
         index++;
-        if (index == 3)
+        if (index == bands.size())
         { // wrap to first index
           index = 0;
         }
@@ -421,7 +427,7 @@ int DisplayManagement::SelectBand(const std::string bands[3])
       }
       menuEncoderMovement = 0;
       tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < bands.size(); i++)
       {
         tft.setCursor(110, 110 + i * 30);
         tft.print(bands[i].c_str());
@@ -978,7 +984,7 @@ void DisplayManagement::CalibrationMachine()
 {
   int i;
   bool lastexitbutton = true;
-  std::string cals[] = {"Initial Cal", "Zero Stepper", "Hardware Settings"};
+  std::vector<std::string> cals = {"Zero Stepper", "Initial Cal", "Hardware Settings", "Hardware Test"};
   EraseBelowMenu();
   state = State::state0; // Enter state0.
   // menuIndex = mode::PRESETSMENU;         // Superfluous???
@@ -986,26 +992,31 @@ void DisplayManagement::CalibrationMachine()
   {
     switch (state)
     {
-    case State::state0:         // Select Calibration algorithm.
+    case State::state0:         // Select function.
       i = SelectBand(cals) + 1; // Calibration states are 1,2,3.
       if (i == 5)
         return;         // No selection in Calibrate menu; exit machine and return to top level.
       state = (State)i; // Cast i to State enum type.
       break;
     case State::state1: // Initial Calibration
-      DoFirstCalibrate();
-      state = State::state0;
-      lastexitbutton = true; // Must set true here, or will jump to top level.
-      break;
-    case State::state2: // Zero Stepper
       PowerStepDdsCirRelay(true, 0, false, false);
       stepper.ResetStepperToZero();
       //PowerStepDdsCirRelay(false, 0, false, false); // !!!
       state = State::state0; // Return to Calibration select after exiting state2.
       lastexitbutton = true; // Must set true here, or will jump to top level.
       break;
+    case State::state2: // Zero Stepper
+      DoFirstCalibrate();
+      state = State::state0;
+      lastexitbutton = true; // Must set true here, or will jump to top level.
+      break;
     case State::state3: // Hardware parameters
       tuneInputs.SelectParameter();
+      state = State::state0;
+      lastexitbutton = true; // Must set true here, or will jump to top level.
+      break;
+      case State::state4: // Hardware parameters
+      testArray.SelectTest();
       state = State::state0;
       lastexitbutton = true; // Must set true here, or will jump to top level.
       break;

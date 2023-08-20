@@ -30,10 +30,10 @@
 
 #include "TuneInputs.h"
 
-TuneInputs::TuneInputs(Adafruit_ILI9341 &tft,
-                               EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, Button &autotunebutton, Button &exitbutton, TmcStepper &tmcstepper)
-                                : DisplayUtility(tft, dds, swr, data, tmcstepper),
-                                  tft(tft), eeprom(eeprom), data(data), enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton), tmcstepper(tmcstepper)
+TuneInputs::TuneInputs(Adafruit_ILI9341 &tft, EEPROMClass &eeprom, Data &data, DDS& dds, Button &enterbutton, 
+                       Button &autotunebutton, Button &exitbutton, TmcStepper &tmcstepper)
+                     : DisplayUtility(tft, dds, swr, data, tmcstepper), tft(tft), eeprom(eeprom), data(data),
+                       enterbutton(enterbutton), autotunebutton(autotunebutton), exitbutton(exitbutton), tmcstepper(tmcstepper)
 {
   parameters[0] = data.workingData.zero_offset;
   parameters[1] = data.workingData.backlash;
@@ -240,4 +240,28 @@ void TuneInputs::HighlightNextChoice(int submenuIndex)
   tft.setTextColor(ILI9341_MAGENTA, ILI9341_WHITE); // HIghlight new preset choice
   tft.setCursor(215, 70 + submenuIndex * 30);
   tft.print(parameters[submenuIndex]);
+}
+
+
+void TuneInputs::EncoderTest() {
+ // Encoders Test
+ int freqEncoderCount = 0;
+ int count = 0;
+ while(true) {
+//  busy_wait_ms(5);
+    tft.setCursor(10, 130);
+    tft.print("FREQ Encoder");
+    freqEncoderPoll();
+    if(frequencyEncoderMovement2) {
+      freqEncoderCount += frequencyEncoderMovement2;
+      frequencyEncoderMovement2 = 0;
+      tft.fillRect(192, 113, 40, 20, ILI9341_BLACK); 
+    }
+    tft.setCursor(200, 130);
+    tft.print(freqEncoderCount);
+
+    tft.setCursor(200, 160);
+    tft.print(count);
+    count = count + 1;
+}
 }

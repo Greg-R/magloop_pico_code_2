@@ -44,6 +44,7 @@
 #include "Data.h"
 #include "Button.h"
 #include "TuneInputs.h"
+#include "Hardware.h"
 //#include "TmcStepper.h"
 #include "FreeSerif9pt7b.h"
 #include "FreeSerif12pt7b.h"
@@ -65,6 +66,7 @@ public:
     Button &autotunebutton;
     Button &exitbutton;
     TuneInputs &tuneInputs;
+    Hardware &testArray;
     int whichBandOption; // This indicates the current band in use.
     float SWRValue;
     float SWRcurrent;
@@ -96,14 +98,15 @@ public:
         state0,
         state1,
         state2,
-        state3
+        state3,
+        state4
     }; // Used to move between states in state machines.
     State state;
     bool startUpFlag;
     bool calFlag;
 
     DisplayManagement(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, StepperManagement &stepper, TmcStepper &tmcstepper, EEPROMClass &eeprom, Data &data,
-                      Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs);
+                      Button &enterbutton, Button &autotunebutton, Button &exitbutton, TuneInputs &tuneInputs, Hardware &testArray);
 
     void Splash(std::string version, std::string releaseDate);
 
@@ -115,7 +118,7 @@ public:
 
     TopMenuState MakeMenuSelection(TopMenuState index);
 
-    int SelectBand(const std::string bands[3]);
+    int SelectBand(std::vector<std::string> bands);
 
     void UpdateFrequency(int frequency);
 

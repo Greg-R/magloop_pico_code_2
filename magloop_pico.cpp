@@ -44,6 +44,7 @@
 #include "Button/Button.h"
 #include "TuneInputs/TuneInputs.h"
 #include "TmcStepper/TmcStepper.h"
+#include "Hardware/Hardware.h"
 
 
 int main()
@@ -139,14 +140,18 @@ int main()
     //  Instantiate the TMC stepper:
   TmcStepper tmcstepper = TmcStepper();
 
-  // Create the TuneInputs object.
-  TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
+
 
    //  Instantiate the Stepper Manager:
   StepperManagement stepper = StepperManagement(tft, dds, swr, data, tmcstepper, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);
 
+  Hardware testArray = Hardware(tft, dds, swr, enterbutton, autotunebutton, exitbutton, data, stepper, tmcstepper);
+
+  // Create the TuneInputs object.
+  TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
+
    // Instantiate the DisplayManagement object.  This object has many important methods.
-  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs);
+  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs, testArray);
 
   // Power on all circuits except stepper and relay.  This is done early to allow circuits to stabilize before calibration.
   display.PowerStepDdsCirRelay(false,  7000000, true, false);
@@ -166,6 +171,8 @@ int main()
   swr.ReadADCoffsets();
   display.PowerStepDdsCirRelay(false, 0, false, false); //  Power down all circuits.
 
+  
+
   //  Temporary code for examining system.
   //display.PowerStepDdsCirRelay(true, 0, false, false);  //  Stepper on only.
   //uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.powerBrakingConfig), 8);
@@ -179,6 +186,9 @@ int main()
   // Main loop state machine:
   while (true)
   {
+    //tuneInputs.SelectParameter();
+  //  testArray.EncoderTest();
+  //testArray.UserNumericInput2(enterbutton, exitbutton, 7000000);
     int i, submenuIndex;
     //  Refresh display:
     display.ShowMainDisplay(display.menuIndex); //  This function erases the entire display.

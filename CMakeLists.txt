@@ -49,6 +49,7 @@ add_subdirectory(EEPROM)
 add_subdirectory(GraphPlot)
 add_subdirectory(Data)
 add_subdirectory(TmcStepper)
+add_subdirectory(Hardware)
 
 # Add any user requested libraries
 target_link_libraries(magloop_pico
@@ -76,6 +77,7 @@ target_link_libraries(magloop_pico
         GraphPlot
         Data
         TmcStepper
+        Hardware
         )
 
 pico_add_extra_outputs(magloop_pico)

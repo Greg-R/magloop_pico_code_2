@@ -97,8 +97,10 @@ CALIBRATEMENU
     bool startUpFlag;
     bool calFlag;
 
-    Rotary menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
-    Rotary frequencyEncoder = Rotary(21, 17);
+   // Rotary menuEncoder = Rotary(20, 18); // Swap if encoder works in wrong direction.
+Rotary menuEncoder;
+   // Rotary frequencyEncoder = Rotary(21, 17);
+Rotary frequencyEncoder;
 int menuEncoderMovement;
 int frequencyEncoderMovement;
 int frequencyEncoderMovement2;
