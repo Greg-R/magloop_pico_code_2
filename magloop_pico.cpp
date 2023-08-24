@@ -165,10 +165,18 @@ int main()
       // Run initial tests if hardware has not been accepted.
   if (data.workingData.hardware != 0x55555555)
   {
+    int bypassTest;
     display.updateMessageTop("Hardware Tests in Progress");
-    testArray.InitialTests();  
-      busy_wait_ms(5000);
+    //  Bypass tests by using MENU encoder.
+    bypassTest = testArray.EncoderBypassTest();
+    display.EraseBelowMenu();
+    testArray.EraseTitle();
+    if(bypassTest == 0) {
+    testArray.InitialTests();  // Run hardware tests.
       display.ErasePage();
+      display.updateMessageMiddle("Cycle Power to Restart");
+      return 0;  // STOP
+    }
   }
 
   //  Set stepper to zero.  DDS is off, and relay is off.

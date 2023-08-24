@@ -140,4 +140,6 @@ const int dataCoorY = 75;
 
   void EraseTitle();
 
+  int EncoderBypassTest();
+
 };

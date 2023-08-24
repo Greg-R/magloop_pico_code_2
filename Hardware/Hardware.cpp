@@ -107,7 +107,6 @@ void Hardware::ButtonTest() {
   uint64_t oneMinute = pauseTime * 1000000;
   timestamp1minute = time_us_64() + oneMinute;
     while (not time_reached(timestamp1minute))
-  //while(true)
   { 
     // Pushbuttons Test  
       enterbutton.buttonPushed();
@@ -184,6 +183,10 @@ void Hardware::EncoderTest() {
       }
   int freqEncoderCount = 0;
   int menuEncoderCount = 0;
+  tft.setCursor(200, dataCoorY);
+  tft.print(0);  // Insert a default value so the user sees something.
+  tft.setCursor(200, dataCoorY +30);
+  tft.print(0);  // Insert a default value so the user sees something.
   // Set up a 1 minute timer.  The test ends at 1 minute.
   uint64_t timestamp1minute;
   uint64_t oneMinute = pauseTime * 1000000;
@@ -227,6 +230,7 @@ void Hardware::MotorTest() {
   uint64_t oneMinute = pauseTime * 1000000;
   //timestamp1minute._private_us_since_boot = time_us_64() + oneMinute;
   timestamp1minute = time_us_64() + oneMinute;
+  stepper.setCurrentPosition(0);
     while (not time_reached(timestamp1minute))
   {
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
@@ -297,7 +301,7 @@ void Hardware::MotorTest() {
       }
       
       tft.setTextColor(ILI9341_MAGENTA, ILI9341_WHITE);
-      tft.setCursor(65, 70 + submenuIndex * 30);
+      tft.setCursor(dataCoorX + 65, dataCoorY + submenuIndex * 30);
       tft.print(tests[submenuIndex].c_str());  // Highlight selection.
       state = State::state1;
       break;
@@ -366,18 +370,75 @@ void Hardware::MotorTest() {
 void Hardware::RestorePreviousChoice(int submenuIndex)
 {
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK); // Restore old background
-  tft.setCursor(65, 70 + submenuIndex * 30);
+  tft.setCursor(dataCoorX + 65, dataCoorY + submenuIndex * 30);
   tft.print(tests[submenuIndex].c_str());
 }
 
 void Hardware::HighlightNextChoice(int submenuIndex)
 {
   tft.setTextColor(ILI9341_MAGENTA, ILI9341_WHITE); // Highlight new preset choice
-  tft.setCursor(65, 70 + submenuIndex * 30);
+  tft.setCursor(dataCoorX + 65, dataCoorY + submenuIndex * 30);
   tft.print(tests[submenuIndex].c_str());
 }
 
 void Hardware::EraseTitle()
 {
  tft.fillRect(titleCoorX, titleCoorY - 14, 200, 20, ILI9341_BLACK);
+}
+
+
+// Encoder Test
+int Hardware::EncoderBypassTest() {
+  std::vector<std::string> encoders = {"MENU Encoder"};
+  EraseBelowMenu();; // Clear display.
+  tft.setTextColor(ILI9341_GREEN);
+  tft.setFont(&FreeSerif9pt7b);
+  tft.setCursor(titleCoorX, titleCoorY);
+  tft.print("Test Bypass");
+    for (int i = 0; i < encoders.size(); i++)
+      {
+        tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
+        tft.setFont(&FreeSerif12pt7b);
+        tft.setCursor(dataCoorX, dataCoorY + i * 30);  // 30 pixels vertical spacing.
+        tft.print(encoders[i].c_str());
+      }
+  tft.setTextColor(ILI9341_RED);
+  tft.setCursor(dataCoorX, dataCoorY + 2 * 30);  // 30 pixels vertical spacing.
+  tft.print("Use MENU set to 10");
+  tft.setCursor(dataCoorX, dataCoorY + 3 * 30);  // 30 pixels vertical spacing.
+  tft.print("to bypass tests");  
+  int freqEncoderCount = 0;
+  int menuEncoderCount = 0;
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setCursor(200, dataCoorY);
+  tft.print(0);  // Insert a default value so the user sees something.
+  // Set up a 1 minute timer.  The test ends at 1 minute.
+  uint64_t timestamp1minute;
+  uint64_t oneMinute = pauseTime * 1000000;
+  timestamp1minute = time_us_64() + oneMinute;
+    while (not time_reached(timestamp1minute))
+  { 
+    // Encoders Test
+    //freqEncoderPoll();
+    menuEncoderPoll();
+    //if(frequencyEncoderMovement2) {
+    //  freqEncoderCount += frequencyEncoderMovement2;
+    //  frequencyEncoderMovement2 = 0;
+    //  tft.fillRect(192, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
+    //tft.setCursor(200, dataCoorY);
+    //tft.setTextColor(ILI9341_WHITE);
+    //tft.print(freqEncoderCount);
+   // }   
+    if(menuEncoderMovement) {
+      menuEncoderCount += menuEncoderMovement;
+      menuEncoderMovement = 0;
+      tft.fillRect(192, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
+      tft.setCursor(200, dataCoorY);
+      tft.setTextColor(ILI9341_WHITE);
+   tft.print(menuEncoderCount);
+    }
+    if(menuEncoderCount == 10) return menuEncoderCount;
+  }   // while(1)  (end of main loop)
+ EraseTitle();
+ return 0;
 }
