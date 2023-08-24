@@ -120,7 +120,7 @@ int main()
 
   //  Now examine the data in the buffer to see if the EEPROM should be initialized.
   //  There is a specific number written to the EEPROM when it is initialized.
-  if (data.workingData.initialized != 0x55555555)
+  if (data.workingData.initialized != 0x55555553)
   {
     data.writeDefaultValues(); //  Writes default values in to the dataStruct in the Data object.
     eeprom.put(0, data.workingData);
@@ -140,18 +140,19 @@ int main()
     //  Instantiate the TMC stepper:
   TmcStepper tmcstepper = TmcStepper();
 
-
-
    //  Instantiate the Stepper Manager:
   StepperManagement stepper = StepperManagement(tft, dds, swr, data, tmcstepper, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);
 
   Hardware testArray = Hardware(tft, dds, swr, enterbutton, autotunebutton, exitbutton, data, stepper, tmcstepper);
 
+
+
   // Create the TuneInputs object.
   TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
 
    // Instantiate the DisplayManagement object.  This object has many important methods.
-  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton, autotunebutton, exitbutton, tuneInputs, testArray);
+  DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton,
+                                                autotunebutton, exitbutton, tuneInputs, testArray);
 
   // Power on all circuits except stepper and relay.  This is done early to allow circuits to stabilize before calibration.
   display.PowerStepDdsCirRelay(false,  7000000, true, false);
@@ -160,6 +161,15 @@ int main()
   display.Splash(data.version, data.releaseDate);
   busy_wait_ms(5000);
   tft.fillScreen(ILI9341_BLACK); // Clear display.
+
+      // Run initial tests if hardware has not been accepted.
+  if (data.workingData.hardware != 0x55555555)
+  {
+    display.updateMessageTop("Hardware Tests in Progress");
+    testArray.InitialTests();  
+      busy_wait_ms(5000);
+      display.ErasePage();
+  }
 
   //  Set stepper to zero.  DDS is off, and relay is off.
   display.PowerStepDdsCirRelay(true, 0, true, false);
@@ -170,8 +180,6 @@ int main()
   display.PowerStepDdsCirRelay(true, 0, true, false);
   swr.ReadADCoffsets();
   display.PowerStepDdsCirRelay(false, 0, false, false); //  Power down all circuits.
-
-  
 
   //  Temporary code for examining system.
   //display.PowerStepDdsCirRelay(true, 0, false, false);  //  Stepper on only.
