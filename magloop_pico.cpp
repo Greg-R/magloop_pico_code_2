@@ -90,6 +90,7 @@ int main()
   //uart_set_fifo_enabled(uart1, true);
 
   int currentFrequency;
+  int bypassTest = 0;
 
   //  The data object manages constants and variables involved with frequencies, stepper motor positions,
   //  and GPIOs.
@@ -145,8 +146,6 @@ int main()
 
   Hardware testArray = Hardware(tft, dds, swr, enterbutton, autotunebutton, exitbutton, data, stepper, tmcstepper);
 
-
-
   // Create the TuneInputs object.
   TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
 
@@ -165,7 +164,6 @@ int main()
       // Run initial tests if hardware has not been accepted.
   if (data.workingData.hardware != 0x55555555)
   {
-    int bypassTest;
     display.updateMessageTop("Hardware Tests in Progress");
     //  Bypass tests by using MENU encoder.
     bypassTest = testArray.EncoderBypassTest();
@@ -180,8 +178,10 @@ int main()
   }
 
   //  Set stepper to zero.  DDS is off, and relay is off.
+  if(bypassTest != 10) {    // Don't do this after test is bypassed.
   display.PowerStepDdsCirRelay(true, 0, true, false);
   stepper.ResetStepperToZero();
+  }
 
   //  Now measure the ADC (SWR bridge) offsets with the DDS inactive.
   //  Note that this should be done as late as possible for circuits to stabilize.

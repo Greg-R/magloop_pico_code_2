@@ -98,7 +98,7 @@ void DisplayManagement::frequencyMenuOption()
     case State::state0:
       return; //  Exit frequency selection and return to top menu Freq.
     case State::state1:
-      whichBandOption = SelectBand(data.bands); // state1
+      whichBandOption = SelectBand(data.bands, 130, 110); // state1
 
       // If SelectBand returns 4, this means the menu was exited without selecting a band.  Move to the top level menu Freq.
       if (whichBandOption == 4)
@@ -376,12 +376,13 @@ DisplayUtility::TopMenuState DisplayManagement::MakeMenuSelection(TopMenuState i
   Purpose: To get a band menu choice
   Argument list:
     const std::string bands[3].  Example: {"40M", "30M", "20M"}
+    int coorX, coorY.  The upper left corner of the menu selections.
   Return value:
     int                       the menu selected
 
   Dependencies:  Adafruit_ILI9341 tft
 *****/
-int DisplayManagement::SelectBand(std::vector<std::string> bands)
+int DisplayManagement::SelectBand(std::vector<std::string> bands, int coorX, int coorY)
 {
   updateMessageTop("       Choose using Menu Encoder");
   EraseBelowMenu(); // Redundant???
@@ -395,10 +396,10 @@ int DisplayManagement::SelectBand(std::vector<std::string> bands)
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
   for (int i = 0; i < bands.size(); i++)
   {
-    tft.setCursor(110, 110 + i * 30);
+    tft.setCursor(coorX, coorY + i * 30);
     tft.print(bands[i].c_str());
   }
-  tft.setCursor(110, 110);
+  tft.setCursor(coorX, coorY);
   tft.setTextColor(ILI9341_BLUE, ILI9341_WHITE);
   tft.print(bands[0].c_str());
   index = 0;
@@ -429,11 +430,11 @@ int DisplayManagement::SelectBand(std::vector<std::string> bands)
       tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
       for (int i = 0; i < bands.size(); i++)
       {
-        tft.setCursor(110, 110 + i * 30);
+        tft.setCursor(coorX, coorY + i * 30);
         tft.print(bands[i].c_str());
       }
       tft.setTextColor(ILI9341_BLUE, ILI9341_WHITE);
-      tft.setCursor(110, 110 + index * 30);
+      tft.setCursor(coorX, coorY + index * 30);
       tft.print(bands[index].c_str());
     }
     // Poll buttons.
@@ -686,7 +687,7 @@ void DisplayManagement::ProcessPresets()
     case State::state0:
       return; // Return to top level.
     case State::state1:
-      whichBandOption = SelectBand(data.bands); // Select the band to be used
+      whichBandOption = SelectBand(data.bands, 130, 100); // Select the band to be used
       this->data.workingData.currentBand = whichBandOption;
       // If SelectBand returns 4, the user exited before selecting a band.  Return to top menu.
       if (whichBandOption == 4)
@@ -993,7 +994,7 @@ void DisplayManagement::CalibrationMachine()
     switch (state)
     {
     case State::state0:         // Select function.
-      i = SelectBand(cals) + 1; // Calibration states are 1,2,3.
+      i = SelectBand(cals, 90, 90) + 1; // Calibration states are 1,2,3.
       if (i == 5)
         return;         // No selection in Calibrate menu; exit machine and return to top level.
       state = (State)i; // Cast i to State enum type.

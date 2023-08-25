@@ -34,7 +34,6 @@ Hardware::Hardware(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Button &enterbutto
                    StepperManagement &stepper, TmcStepper &tmcstepper):DisplayUtility(tft, dds, swr, data, tmcstepper), tft(tft), dds(dds), swr(swr), enterbutton(enterbutton),
                    autotunebutton(autotunebutton), exitbutton(exitbutton), data(data), stepper(stepper), tmcstepper(tmcstepper)
 {
-   //parameterNames = {"Zero Offset", "Backlash", "Coarse Sweep", "Acceleration", "Speed"};
    maxclose = false;
    zeroclose = false;
    submenuIndex = 0;
@@ -66,21 +65,21 @@ void Hardware::SWR_Test() {
   // Main loop state machine:
   while (not time_reached(timestamp1minute))  // 1 minute timer
   {
-   tft.setCursor(90, dataCoorY);
+   tft.setCursor(120, dataCoorY);
    tft.print(swr.ReadSWRValue());
    // Read and print forward ADC integer.
    adc_select_input(1);
-   tft.setCursor(205, dataCoorY + 30);
+   tft.setCursor(225, dataCoorY + 30);
    tft.print(adc_read());
   // Read and print reverse ADC integer.
    adc_select_input(0);
-   tft.setCursor(205, dataCoorY + 60);
+   tft.setCursor(225, dataCoorY + 60);
    tft.print(adc_read());
    busy_wait_ms(1000);
    // Blank out old readings
-   tft.fillRect(90, dataCoorY - 17      , 70, 20, ILI9341_BLACK);
-   tft.fillRect(205, dataCoorY + 30 - 17, 60, 20, ILI9341_BLACK);
-   tft.fillRect(205, dataCoorY + 60 - 17, 60, 20, ILI9341_BLACK);
+   tft.fillRect(120, dataCoorY - 17      , 70, 20, ILI9341_BLACK);
+   tft.fillRect(225, dataCoorY + 30 - 17, 60, 20, ILI9341_BLACK);
+   tft.fillRect(225, dataCoorY + 60 - 17, 60, 20, ILI9341_BLACK);
   }   // while(1)  (end of main loop)
   PowerStepDdsCirRelay(false,  0, false, false);  // Deactivate SWR circuits.
 EraseTitle();
@@ -112,52 +111,50 @@ void Hardware::ButtonTest() {
       enterbutton.buttonPushed();
     if(enterbutton.pushed) {
       tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(200, dataCoorY);
+      tft.setCursor(220, dataCoorY);
       tft.print("PUSHED");
     } else {
-      //tft.fillRect(195, 25, 100, 20, ILI9341_WHITE); 
-      tft.setCursor(200, dataCoorY);
+      tft.setCursor(220, dataCoorY);
       tft.setTextColor(ILI9341_BLACK);
       tft.print("PUSHED");
     }    
     autotunebutton.buttonPushed();
     if(autotunebutton.pushed) {
       tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(200, dataCoorY + 30);
+      tft.setCursor(220, dataCoorY + 30);
       tft.print("PUSHED");
     } else {
-      //tft.fillRect(195, 53, 100, 20, ILI9341_BLACK);
-      tft.setCursor(200, dataCoorY + 30);
+      tft.setCursor(220, dataCoorY + 30);
       tft.setTextColor(ILI9341_BLACK);
       tft.print("PUSHED");
     }
        exitbutton.buttonPushed();
     if(exitbutton.pushed) {
-            tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(200, dataCoorY + 60);
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setCursor(220, dataCoorY + 60);
       tft.print("PUSHED");
     } else {
-      tft.setCursor(200, dataCoorY + 60);
+      tft.setCursor(220, dataCoorY + 60);
       tft.setTextColor(ILI9341_BLACK);
       tft.print("PUSHED");
     }
     //     Antenna switch tests
     if(gpio_get(data.zeroswitch) == 0) {
             tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(200, dataCoorY + 90);
+      tft.setCursor(220, dataCoorY + 90);
       tft.print("CLOSED");
     } else {
-          tft.setCursor(200, dataCoorY + 90);
-          tft.setTextColor(ILI9341_BLACK);
+      tft.setCursor(220, dataCoorY + 90);
+      tft.setTextColor(ILI9341_BLACK);
       tft.print("CLOSED");
     }   
     if(gpio_get(data.maxswitch) == 0) {
       tft.setTextColor(ILI9341_WHITE);
-      tft.setCursor(200, dataCoorY + 120);
+      tft.setCursor(220, dataCoorY + 120);
       tft.print("CLOSED");
     } else {
-            tft.setCursor(200, dataCoorY + 120);
-            tft.setTextColor(ILI9341_BLACK);
+      tft.setCursor(220, dataCoorY + 120);
+      tft.setTextColor(ILI9341_BLACK);
       tft.print("CLOSED");
     }   
   
@@ -183,9 +180,10 @@ void Hardware::EncoderTest() {
       }
   int freqEncoderCount = 0;
   int menuEncoderCount = 0;
-  tft.setCursor(200, dataCoorY);
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setCursor(220, dataCoorY);
   tft.print(0);  // Insert a default value so the user sees something.
-  tft.setCursor(200, dataCoorY +30);
+  tft.setCursor(220, dataCoorY +30);
   tft.print(0);  // Insert a default value so the user sees something.
   // Set up a 1 minute timer.  The test ends at 1 minute.
   uint64_t timestamp1minute;
@@ -199,16 +197,16 @@ void Hardware::EncoderTest() {
     if(frequencyEncoderMovement2) {
       freqEncoderCount += frequencyEncoderMovement2;
       frequencyEncoderMovement2 = 0;
-      tft.fillRect(192, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
-    tft.setCursor(200, dataCoorY);
+      tft.fillRect(220, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
+    tft.setCursor(220, dataCoorY);
     tft.setTextColor(ILI9341_WHITE);
     tft.print(freqEncoderCount);
     }   
     if(menuEncoderMovement) {
       menuEncoderCount += menuEncoderMovement;
       menuEncoderMovement = 0;
-      tft.fillRect(192, dataCoorY + 30 - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
-      tft.setCursor(200, dataCoorY + 30);
+      tft.fillRect(220, dataCoorY + 30 - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
+      tft.setCursor(220, dataCoorY + 30);
       tft.setTextColor(ILI9341_WHITE);
    tft.print(menuEncoderCount);
     }
@@ -258,8 +256,8 @@ void Hardware::MotorTest() {
       updateMessageTop("Hardware Tests in Progress");
       ButtonTest();
       EncoderTest();
-      SWR_Test();
-      MotorTest();
+  //    SWR_Test();
+  //    MotorTest();
   }
 
   void Hardware::SelectTest()
@@ -410,7 +408,7 @@ int Hardware::EncoderBypassTest() {
   int freqEncoderCount = 0;
   int menuEncoderCount = 0;
   tft.setTextColor(ILI9341_WHITE);
-  tft.setCursor(200, dataCoorY);
+  tft.setCursor(dataCoorX + 180, dataCoorY);
   tft.print(0);  // Insert a default value so the user sees something.
   // Set up a 1 minute timer.  The test ends at 1 minute.
   uint64_t timestamp1minute;
@@ -432,10 +430,10 @@ int Hardware::EncoderBypassTest() {
     if(menuEncoderMovement) {
       menuEncoderCount += menuEncoderMovement;
       menuEncoderMovement = 0;
-      tft.fillRect(192, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
-      tft.setCursor(200, dataCoorY);
+      tft.fillRect(dataCoorX + 180, dataCoorY - 17, 50, 20, ILI9341_BLACK);  // Erase old value.
+      tft.setCursor(dataCoorX + 180, dataCoorY);
       tft.setTextColor(ILI9341_WHITE);
-   tft.print(menuEncoderCount);
+      tft.print(menuEncoderCount);
     }
     if(menuEncoderCount == 10) return menuEncoderCount;
   }   // while(1)  (end of main loop)

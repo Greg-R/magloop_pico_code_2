@@ -118,7 +118,7 @@ public:
 
     TopMenuState MakeMenuSelection(TopMenuState index);
 
-    int SelectBand(std::vector<std::string> bands);
+    int SelectBand(std::vector<std::string> bands, int coorX, int coorY);
 
     void UpdateFrequency(int frequency);
 

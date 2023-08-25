@@ -91,7 +91,7 @@ void Data::writeDefaultValues()
    workingData.currentFrequency = 7150000;
    workingData.initialized = 0x55555555;
    workingData.calibrated = 0;
-   workingData.hardware = 0;   // 0 means hardware not accepted. 0x55555555 is accepted hardware.
+   workingData.hardware = 0x55555555;   // 0 means hardware not accepted. 0x55555555 is accepted hardware.
 
    workingData.zero_offset = 1000;  // zero offset
    workingData.backlash = 60;    // backlash

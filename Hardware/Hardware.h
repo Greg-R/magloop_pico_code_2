@@ -81,8 +81,8 @@ TmcStepper &tmcstepper;
 StepperManagement &stepper;
 const int titleCoorX = 10;
 const int titleCoorY = 37;
-const int dataCoorX = 10;
-const int dataCoorY = 75;
+const int dataCoorX = 40;
+const int dataCoorY = 85;
 
   // Flags used to indicate switch closures.
   bool maxclose;
@@ -90,7 +90,7 @@ const int dataCoorY = 75;
 
   // Bands used:
 
-  std::vector<std::string> tests = {"Button Test", "Encoder Test", "SWR Test", "Motor Test", "Confirm Hardware"};
+  std::vector<std::string> tests = {"Button Test", "Encoder Test", "SWR Test", "Motor Test"};
 
   //  This should be made variable length arrays.
   //float countPerHertz[3];
