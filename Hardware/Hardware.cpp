@@ -50,10 +50,6 @@ void Hardware::SWR_Test() {
   //  Start the DDS:
   PowerStepDdsCirRelay(false,  7000000, true, false); // Activate SWR circuits.
   float swrValue;
-  // Set up a 1 minute timer.  The test ends at 1 minute.
-  absolute_time_t timestamp1minute;
-  long long unsigned int oneMinute = pauseTime * 1000000;
-  timestamp1minute = time_us_64() + oneMinute;
   tft.setTextSize(1);          
   for (int i = 0; i < swrArray.size(); i++)
       {
@@ -62,6 +58,9 @@ void Hardware::SWR_Test() {
         tft.setCursor(dataCoorX, dataCoorY + i * 30);  // 30 pixels vertical spacing.
         tft.print(swrArray[i].c_str());
       }
+  // Set up a 1 minute timer.  The test ends at 1 minute.
+  uint64_t oneMinute = pauseTime * 1000000;
+  absolute_time_t timestamp1minute = {time_us_64() + oneMinute};
   // Main loop state machine:
   while (not time_reached(timestamp1minute))  // 1 minute timer
   {
@@ -102,9 +101,8 @@ void Hardware::ButtonTest() {
         tft.print(buttons[i].c_str());
       }
   // Set up a 1 minute timer.  The test ends at 1 minute.
-  long long unsigned int timestamp1minute;
   uint64_t oneMinute = pauseTime * 1000000;
-  timestamp1minute = time_us_64() + oneMinute;
+  absolute_time_t timestamp1minute = {time_us_64() + oneMinute};
     while (not time_reached(timestamp1minute))
   { 
     // Pushbuttons Test  
@@ -186,9 +184,8 @@ void Hardware::EncoderTest() {
   tft.setCursor(220, dataCoorY +30);
   tft.print(0);  // Insert a default value so the user sees something.
   // Set up a 1 minute timer.  The test ends at 1 minute.
-  uint64_t timestamp1minute;
   uint64_t oneMinute = pauseTime * 1000000;
-  timestamp1minute = time_us_64() + oneMinute;
+  absolute_time_t timestamp1minute = {time_us_64() + oneMinute};
     while (not time_reached(timestamp1minute))
   { 
     // Encoders Test
@@ -222,27 +219,23 @@ void Hardware::MotorTest() {
   tft.setFont(&FreeSerif9pt7b);
   tft.print("Stepper Motor Test");
   PowerStepDdsCirRelay(true,  0, false, false); // Activate motor circuit.
+  stepper.setCurrentPosition(0);  // Set current position to zero.
+  stepper.setMaxSpeed(data.workingData.speed / 2);  // Move slowly, this is a test!
   // Set up a 1 minute timer.  The test ends at 1 minute.
-  //absolute_time_t timestamp1minute;
-  uint64_t timestamp1minute;
   uint64_t oneMinute = pauseTime * 1000000;
-  //timestamp1minute._private_us_since_boot = time_us_64() + oneMinute;
-  timestamp1minute = time_us_64() + oneMinute;
-  stepper.setCurrentPosition(0);
+  absolute_time_t timestamp1minute = {time_us_64() + oneMinute};
     while (not time_reached(timestamp1minute))
   {
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
   tft.setCursor(10, 90);
   tft.setFont(&FreeSerif12pt7b);
   tft.print("Move motor towards max");
-  stepper.moveTo(500);
-  stepper.runToPosition();
+  stepper.MoveStepperToPosition(1500);
   busy_wait_ms(1000);
   tft.fillRect(10, 74, 300, 20, ILI9341_BLACK);
   tft.setCursor(10, 90);
   tft.print("Return towards zero");
-  stepper.moveTo(0);
-  stepper.runToPosition();
+  stepper.MoveStepperToPosition(-1500);
   busy_wait_ms(1000);
   tft.fillRect(10, 74, 300, 20, ILI9341_BLACK);
   }   // while(1)  (end of main loop)
@@ -411,9 +404,12 @@ int Hardware::EncoderBypassTest() {
   tft.setCursor(dataCoorX + 180, dataCoorY);
   tft.print(0);  // Insert a default value so the user sees something.
   // Set up a 1 minute timer.  The test ends at 1 minute.
-  uint64_t timestamp1minute;
-  uint64_t oneMinute = pauseTime * 1000000;
-  timestamp1minute = time_us_64() + oneMinute;
+ // uint64_t timestamp1minute;
+  //uint64_t oneMinute = pauseTime * 1000000;
+  //timestamp1minute = time_us_64() + oneMinute;
+
+    uint64_t oneMinute = pauseTime * 1000000;
+  absolute_time_t timestamp1minute = {time_us_64() + oneMinute};
     while (not time_reached(timestamp1minute))
   { 
     // Encoders Test
