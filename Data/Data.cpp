@@ -89,13 +89,13 @@ void Data::writeDefaultValues()
 
    workingData.currentBand = 0;
    workingData.currentFrequency = 7150000;
-   workingData.initialized = 0x55555555;
-   workingData.calibrated = 0;
-   workingData.hardware = 0x55555555;   // 0 means hardware not accepted. 0x55555555 is accepted hardware.
+   workingData.initialized = 0x55555555;  // 0x55555555 means the workingData struct has been initialized.
+   workingData.calibrated = 0x00000000;   // Set to something other than 0 if calibrated.
+   workingData.hardware = 0x00000000;     // 0 means hardware not accepted. 0x55555555 is accepted hardware.
 
    workingData.zero_offset = 1000;  // zero offset
-   workingData.backlash = 60;    // backlash
-   workingData.coarse_sweep = 20;    // coarse tune
-   workingData.accel = 2000;  // acceleration
-   workingData.speed = 500;   // speed
+   workingData.backlash = 60;       // backlash
+   workingData.coarse_sweep = 20;   // coarse tune
+   workingData.accel = 2000;        // acceleration
+   workingData.speed = 500;         // speed
 }

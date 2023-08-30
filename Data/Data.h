@@ -43,7 +43,7 @@ class Data
 public:
 
 const std::string version = "main";
-const std::string releaseDate = "5-07-23";
+const std::string releaseDate = "8-30-23";
 
   // Flags used to indicate switch closures.
   bool maxclose;
@@ -86,7 +86,7 @@ const std::string releaseDate = "5-07-23";
     uint32_t currentFrequency = 7150000;
     uint32_t lastFreq[3];  // Used to remember the last autotune frequency.
     uint32_t initialized = 0x55555555;
-    uint32_t calibrated;
+    uint32_t calibrated; //  Please run Initial Calibration! if not set to correct value.
     uint32_t hardware;   //  0x55555555 means hardware is accepted.
   // The following are parameters which must be "tuned" to the particular mechanics in use.
   // Refer to the documentation for setting these values.

@@ -39,7 +39,6 @@
 #include "hardware/clocks.h"
 #include "hardware/uart.h"
 #include "Adafruit_ILI9341.h"
-//#include "DisplayManagement.h"
 #include "AccelStepper.h"
 #include "StepperManagement.h"
 #include "DDS.h"
@@ -47,7 +46,6 @@
 #include "EEPROM.h"
 #include "Data.h"
 #include "Button.h"
-//#include "TuneInputs.h"
 #include "TmcStepper.h"
 #include "DisplayUtility.h"
 #include "FreeSerif9pt7b.h"
@@ -57,71 +55,47 @@
 #include "FreeMono12pt7b.h"
 #include "FreeMono24pt7b.h"
 
-//int menuEncoderMovement;
-//int frequencyEncoderMovement;
-//int frequencyEncoderMovement2;
-//int digitEncoderMovement;
-
 //  This class is intended to manage various frequency and position related constants and variables.
 //  The single object will be referenced by most or maybe all of the other class objects.
 
-class Hardware  : public DisplayUtility
+class Hardware : public DisplayUtility
 {
 
 public:
-
-Adafruit_ILI9341 &tft;
-DDS &dds;
-SWR &swr;
-Button &enterbutton;
-Button &autotunebutton;
-Button &exitbutton;
-Data &data;
-TmcStepper &tmcstepper;
-StepperManagement &stepper;
-const int titleCoorX = 10;
-const int titleCoorY = 37;
-const int dataCoorX = 40;
-const int dataCoorY = 85;
-
+  Adafruit_ILI9341 &tft;
+  DDS &dds;
+  SWR &swr;
+  Button &enterbutton;
+  Button &autotunebutton;
+  Button &exitbutton;
+  Data &data;
+  TmcStepper &tmcstepper;
+  StepperManagement &stepper;
+  const int titleCoorX = 10;
+  const int titleCoorY = 37;
+  const int dataCoorX = 40;
+  const int dataCoorY = 85;
   // Flags used to indicate switch closures.
   bool maxclose;
   bool zeroclose;
-
-  // Bands used:
-
   std::vector<std::string> tests = {"Button Test", "Encoder Test", "SWR Test", "Motor Test"};
-
-  //  This should be made variable length arrays.
-  //float countPerHertz[3];
-  //float hertzPerStepperUnitVVC[3]; // Voltage Variable Cap
-
-  // GPIO assignments.
-  //  Buttons
-  //uint enterButton = 6;
-  //uint autotuneButton = 7;
-  //uint exitButton = 9;
-  // Zero and Maximum switches.
-  //uint zeroswitch = 10;
-  //uint maxswitch = 11;
   // Stepper position.  This is here because it is not always convenient to interogate the stepper object.
   int32_t position;
-    enum class State
-    {
-        state0,
-        state1,
-        state2,
-        state3
-    }; // Used to move between states in state machines.
-    State state;
-    volatile int menuEncoderState;
-    int submenuIndex, pauseTime;
-    //std::array<std::string, 5> parameterNames;
+  enum class State
+  {
+    state0,
+    state1,
+    state2,
+    state3
+  }; // Used to move between states in state machines.
+  State state;
+  volatile int menuEncoderState;
+  int submenuIndex, pauseTime;
 
   Hardware(Adafruit_ILI9341 &tft, DDS &dds, SWR &swr, Button &enterbutton, Button &autotunebutton, Button &exitbutton, Data &data, StepperManagement &stepper, TmcStepper &tmcstepper);
 
   int32_t UserNumericInput2(Button buttonAccept, Button buttonReject, int32_t number);
-  
+
   void SWR_Test();
 
   void ButtonTest();
@@ -141,5 +115,4 @@ const int dataCoorY = 85;
   void EraseTitle();
 
   int EncoderBypassTest();
-
 };

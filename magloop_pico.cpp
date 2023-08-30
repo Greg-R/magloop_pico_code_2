@@ -27,7 +27,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 */
-//#define PICO_STACK_SIZE _u(0x1000)  // Uncomment if stack gets blown.  This doubles stack size.//
+// #define PICO_STACK_SIZE _u(0x1000)  // Uncomment if stack gets blown.  This doubles stack size.//
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "hardware/timer.h"
@@ -45,7 +45,6 @@
 #include "TuneInputs/TuneInputs.h"
 #include "TmcStepper/TmcStepper.h"
 #include "Hardware/Hardware.h"
-
 
 int main()
 {
@@ -87,10 +86,10 @@ int main()
   uart_set_hw_flow(uart1, false, false);
   // Set our data format
   uart_set_format(uart1, 8, 1, UART_PARITY_NONE);
-  //uart_set_fifo_enabled(uart1, true);
+  // uart_set_fifo_enabled(uart1, true);
 
   int currentFrequency;
-  int bypassTest = 0;
+  int bypassTest = 5;  // Set to arbitrary value other than 0 or 10.
 
   //  The data object manages constants and variables involved with frequencies, stepper motor positions,
   //  and GPIOs.
@@ -121,11 +120,12 @@ int main()
 
   //  Now examine the data in the buffer to see if the EEPROM should be initialized.
   //  There is a specific number written to the EEPROM when it is initialized.
-  if (data.workingData.initialized != 0x55555553)
+  if (data.workingData.initialized != 0x55555555)
   {
     data.writeDefaultValues(); //  Writes default values in to the dataStruct in the Data object.
     eeprom.put(0, data.workingData);
     eeprom.commit();
+    eeprom.get(0, data.workingData); // Read the workingData struct from EEPROM.
   }
 
   // Slopes can't be computed until the actual values are loaded from FLASH:
@@ -138,10 +138,10 @@ int main()
   // Instantiate SWR object.  Read bridge offsets later when other circuits are active.
   SWR swr = SWR();
 
-    //  Instantiate the TMC stepper:
+  //  Instantiate the TMC stepper:
   TmcStepper tmcstepper = TmcStepper();
 
-   //  Instantiate the Stepper Manager:
+  //  Instantiate the Stepper Manager:
   StepperManagement stepper = StepperManagement(tft, dds, swr, data, tmcstepper, AccelStepper::MotorInterfaceType::DRIVER, 0, 1);
 
   Hardware testArray = Hardware(tft, dds, swr, enterbutton, autotunebutton, exitbutton, data, stepper, tmcstepper);
@@ -149,19 +149,19 @@ int main()
   // Create the TuneInputs object.
   TuneInputs tuneInputs = TuneInputs(tft, eeprom, data, dds, enterbutton, autotunebutton, exitbutton, tmcstepper);
 
-   // Instantiate the DisplayManagement object.  This object has many important methods.
+  // Instantiate the DisplayManagement object.  This object has many important methods.
   DisplayManagement display = DisplayManagement(tft, dds, swr, stepper, tmcstepper, eeprom, data, enterbutton,
                                                 autotunebutton, exitbutton, tuneInputs, testArray);
 
   // Power on all circuits except stepper and relay.  This is done early to allow circuits to stabilize before calibration.
-  display.PowerStepDdsCirRelay(false,  7000000, true, false);
+  display.PowerStepDdsCirRelay(false, 7000000, true, false);
 
   // Show "Splash" screen for 5 seconds.  This also allows circuits to stabilize.
   display.Splash(data.version, data.releaseDate);
   busy_wait_ms(5000);
   tft.fillScreen(ILI9341_BLACK); // Clear display.
 
-      // Run initial tests if hardware has not been accepted.
+  // Run initial tests if hardware has not been accepted.
   if (data.workingData.hardware != 0x55555555)
   {
     display.updateMessageTop("Hardware Tests in Progress");
@@ -169,18 +169,27 @@ int main()
     bypassTest = testArray.EncoderBypassTest();
     display.EraseBelowMenu();
     testArray.EraseTitle();
-    if(bypassTest == 0) {
-    testArray.InitialTests();  // Run hardware tests.
+    if (bypassTest == 10)
+    {
+      data.workingData.hardware = 0x55555555;
+      eeprom.put(0, data.workingData);
+      eeprom.commit(); // Write to EEPROM.
+    }
+    if (bypassTest == 0)
+    {
+      testArray.InitialTests(); // Run hardware tests.
       display.ErasePage();
       display.updateMessageMiddle("Cycle Power to Restart");
-      return 0;  // STOP
+      return 0; // STOP
     }
   }
 
-  //  Set stepper to zero.  DDS is off, and relay is off.
-  if(bypassTest != 10) {    // Don't do this after test is bypassed.
-  display.PowerStepDdsCirRelay(true, 0, true, false);
-  stepper.ResetStepperToZero();
+  // Set stepper to zero.  DDS is off, and relay is off.
+  // Don't do this after test is bypassed because the motor is not tested yet.
+  // Also don't do this until the initial calibration is completed.
+  if ((bypassTest != 10) and (data.workingData.calibrated == 1)) {
+    display.PowerStepDdsCirRelay(true, 0, true, false);
+    stepper.ResetStepperToZero();
   }
 
   //  Now measure the ADC (SWR bridge) offsets with the DDS inactive.
@@ -190,21 +199,21 @@ int main()
   display.PowerStepDdsCirRelay(false, 0, false, false); //  Power down all circuits.
 
   //  Temporary code for examining system.
-  //display.PowerStepDdsCirRelay(true, 0, false, false);  //  Stepper on only.
-  //uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.powerBrakingConfig), 8);
-  //uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.iHoldiRun), 8);
-  //stepper.MoveStepperToPosition(4000);  // Preset stepper to some desired frequency.
-  //display.manualTune();  //  Manual steps using encoder.
-  //display.PowerStepDdsCirRelay(false, 7000000, true, false);
+  // display.PowerStepDdsCirRelay(true, 0, false, false);  //  Stepper on only.
+  // uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.powerBrakingConfig), 8);
+  // uart_write_blocking(uart1, display.tmcstepper.getCommand(display.tmcstepper.iHoldiRun), 8);
+  // stepper.MoveStepperToPosition(4000);  // Preset stepper to some desired frequency.
+  // display.manualTune();  //  Manual steps using encoder.
+  // display.PowerStepDdsCirRelay(false, 7000000, true, false);
 
   display.menuIndex = display.TopMenuState::FREQMENU; // Begin in Frequency menu.
 
   // Main loop state machine:
   while (true)
   {
-    //tuneInputs.SelectParameter();
-  //  testArray.EncoderTest();
-  //testArray.UserNumericInput2(enterbutton, exitbutton, 7000000);
+    // tuneInputs.SelectParameter();
+    //  testArray.EncoderTest();
+    // testArray.UserNumericInput2(enterbutton, exitbutton, 7000000);
     int i, submenuIndex;
     //  Refresh display:
     display.ShowMainDisplay(display.menuIndex); //  This function erases the entire display.
@@ -218,8 +227,8 @@ int main()
       display.frequencyMenuOption();
       break;
 
-    case display.TopMenuState::PRESETMENU:    // Preset frequencies by band - set in .ino file, variable: presetFrequencies[0][2];
-      display.ProcessPresets(); // Select a preselected frequency.  This should return a frequency???
+    case display.TopMenuState::PRESETMENU: // Preset frequencies by band - set in .ino file, variable: presetFrequencies[0][2];
+      display.ProcessPresets();            // Select a preselected frequency.  This should return a frequency???
       break;
 
     case display.TopMenuState::CALIBRATEMENU: // Run calibration routines.
